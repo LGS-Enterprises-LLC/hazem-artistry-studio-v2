@@ -1,20 +1,14 @@
-import React, { useRef, useEffect } from 'react';
-import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
-import { ArrowDown } from 'lucide-react';
-import SplitText from '@/components/SplitText';
+import React, { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { ArrowDown, Play } from 'lucide-react';
+import Hero3DPortrait from '@/components/Hero3DPortrait';
+import KineticText from '@/components/KineticText';
 import TextMarquee from '@/components/TextMarquee';
 import MagneticElement from '@/components/MagneticElement';
+import HeroBackground from '@/components/HeroBackground';
 
 const Hero: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLDivElement>(null);
-  
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  
-  const springConfig = { damping: 30, stiffness: 200 };
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [10, -10]), springConfig);
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-10, 10]), springConfig);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -22,20 +16,8 @@ const Hero: React.FC = () => {
   });
 
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8]);
-  const y = useTransform(scrollYProgress, [0, 1], [0, 200]);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const { clientX, clientY } = e;
-      const { innerWidth, innerHeight } = window;
-      mouseX.set((clientX / innerWidth) - 0.5);
-      mouseY.set((clientY / innerHeight) - 0.5);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [mouseX, mouseY]);
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.9]);
+  const y = useTransform(scrollYProgress, [0, 1], [0, 300]);
 
   const scrollToWork = () => {
     document.getElementById('work')?.scrollIntoView({ behavior: 'smooth' });
@@ -46,151 +28,157 @@ const Hero: React.FC = () => {
       ref={containerRef}
       className="relative min-h-screen flex flex-col justify-center overflow-hidden noise"
     >
-      {/* Background Grid */}
+      {/* 3D Particle Background */}
+      <HeroBackground />
+      
+      {/* Grid Pattern */}
       <div className="absolute inset-0 grid-pattern" />
       
-      {/* Accent Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial pointer-events-none" />
-      
-      {/* Floating shapes */}
+      {/* Animated gradient orbs */}
       <motion.div
-        className="absolute top-[20%] left-[10%] w-2 h-2 bg-accent rounded-full"
-        animate={{ y: [-20, 20, -20], opacity: [0.5, 1, 0.5] }}
-        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        className="absolute bottom-[30%] right-[15%] w-3 h-3 border border-foreground/30 rotate-45"
-        animate={{ rotate: [45, 225, 45], opacity: [0.3, 0.6, 0.3] }}
+        className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full blur-[150px] opacity-20"
+        style={{ background: 'radial-gradient(circle, hsl(var(--accent)) 0%, transparent 70%)' }}
+        animate={{ 
+          scale: [1, 1.2, 1],
+          x: [0, 50, 0],
+          y: [0, -30, 0],
+        }}
         transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
       />
+      
       <motion.div
-        className="absolute top-[60%] left-[5%] w-20 h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent"
-        animate={{ scaleX: [0, 1, 0], x: [0, 100, 200] }}
-        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full blur-[120px] opacity-15"
+        style={{ background: 'radial-gradient(circle, hsl(0, 0%, 100%) 0%, transparent 70%)' }}
+        animate={{ 
+          scale: [1.2, 1, 1.2],
+          x: [0, -30, 0],
+          y: [0, 50, 0],
+        }}
+        transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
       />
 
       {/* Main Content */}
       <motion.div
-        className="relative z-10 container mx-auto px-6 pt-32 pb-20"
+        className="relative z-10 container mx-auto px-4 md:px-6 pt-24 md:pt-32 pb-20"
         style={{ opacity, scale, y }}
       >
-        {/* Top Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="mb-8"
-        >
-          <span className="inline-flex items-center gap-3 text-xs tracking-[0.3em] uppercase text-muted-foreground">
-            <span className="w-12 h-px bg-accent" />
-            Web Design Agency
-          </span>
-        </motion.div>
-
-        {/* Main Headline - Giant Typography */}
-        <div className="mb-12">
-          <h1 className="text-giant font-display leading-[0.85]">
-            <SplitText text="WE CREATE" delay={0.3} />
-            <br />
-            <span className="text-stroke">
-              <SplitText text="DIGITAL" delay={0.5} />
-            </span>
-            <br />
-            <span className="relative inline-block">
-              <SplitText text="EXPERIENCES" delay={0.7} />
-              <motion.span
-                className="absolute -bottom-2 left-0 w-full h-1 bg-accent"
-                initial={{ scaleX: 0, originX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ duration: 1.2, delay: 1.5, ease: [0.23, 1, 0.32, 1] }}
-              />
-            </span>
-          </h1>
-        </div>
-
-        {/* Subheadline and CTA */}
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-12">
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1.2 }}
-            className="max-w-md text-lg text-muted-foreground leading-relaxed font-body"
-          >
-            Elite web design agency crafting high-converting websites and sales funnels 
-            that generate millions for ambitious brands worldwide.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1.4 }}
-          >
-            <MagneticElement
-              as="button"
-              className="group magnetic-btn relative px-12 py-5 border border-foreground text-foreground font-display font-semibold tracking-wider overflow-hidden"
-              onClick={scrollToWork}
-              strength={0.3}
-            >
-              <span className="relative z-10 flex items-center gap-3 group-hover:text-background transition-colors duration-500">
-                VIEW WORK
-                <ArrowDown className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
-              </span>
-            </MagneticElement>
-          </motion.div>
-        </div>
-
-        {/* 3D Portrait Section */}
-        <motion.div
-          ref={imageRef}
-          className="absolute right-0 top-1/2 -translate-y-1/2 w-[40vw] h-[60vh] hidden lg:block"
-          style={{
-            rotateX,
-            rotateY,
-            transformPerspective: 1000,
-          }}
-          initial={{ opacity: 0, x: 100 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1.2, delay: 0.8 }}
-        >
-          <div className="relative w-full h-full">
-            {/* Portrait Placeholder - Will be replaced with actual image */}
-            <div className="absolute inset-0 bg-gradient-to-br from-secondary to-card overflow-hidden">
-              <motion.div
-                className="absolute inset-0"
-                style={{
-                  backgroundImage: `url('/placeholder.svg')`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                }}
-              />
-              {/* Red accent overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-accent/20 to-transparent mix-blend-overlay" />
-            </div>
-            
-            {/* Decorative Frame */}
-            <div className="absolute -inset-4 border border-foreground/10" />
-            <div className="absolute -inset-8 border border-foreground/5" />
-            
-            {/* Name Badge */}
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center min-h-[80vh]">
+          {/* Left Column - Typography */}
+          <div className="order-2 lg:order-1">
+            {/* Top Badge */}
             <motion.div
-              className="absolute -left-20 bottom-20 bg-background border border-border px-6 py-3"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1.5, duration: 0.6 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="mb-6 md:mb-8"
             >
-              <span className="text-xs tracking-[0.2em] uppercase text-muted-foreground">Founder</span>
-              <p className="font-display font-bold text-lg">HAZEM MAGDY</p>
+              <span className="inline-flex items-center gap-3 text-[10px] md:text-xs tracking-[0.3em] uppercase text-muted-foreground">
+                <motion.span 
+                  className="w-8 md:w-12 h-px bg-accent"
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: 0.8, delay: 0.4 }}
+                />
+                Elite Web Design Agency
+              </span>
+            </motion.div>
+
+            {/* Main Headline - Giant Typography */}
+            <div className="mb-8 md:mb-12">
+              <h1 className="text-[clamp(2.5rem,10vw,10rem)] font-display font-extrabold leading-[0.85] tracking-tight">
+                <span className="block overflow-hidden">
+                  <KineticText text="WE CREATE" delay={0.3} type="words" animation="fade-up" />
+                </span>
+                <span className="block overflow-hidden text-stroke">
+                  <KineticText text="DIGITAL" delay={0.6} type="words" animation="fade-up" />
+                </span>
+                <span className="block overflow-hidden relative">
+                  <KineticText text="EXPERIENCES" delay={0.9} type="words" animation="fade-up" />
+                  <motion.span
+                    className="absolute -bottom-1 md:-bottom-2 left-0 w-full h-1 md:h-2 bg-accent"
+                    initial={{ scaleX: 0, originX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: 1.2, delay: 1.8, ease: [0.23, 1, 0.32, 1] }}
+                  />
+                </span>
+              </h1>
+            </div>
+
+            {/* Subheadline */}
+            <motion.p
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1.4 }}
+              className="max-w-lg text-base md:text-xl text-muted-foreground leading-relaxed font-body mb-8 md:mb-12"
+            >
+              World-class web design agency crafting high-converting websites and sales funnels 
+              that generate <span className="text-accent font-semibold">$10M+</span> for ambitious brands worldwide.
+            </motion.p>
+
+            {/* CTAs */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1.6 }}
+              className="flex flex-wrap gap-4"
+            >
+              <MagneticElement
+                as="button"
+                className="group magnetic-btn relative px-8 md:px-12 py-4 md:py-5 bg-accent text-accent-foreground font-display font-bold tracking-wider overflow-hidden"
+                onClick={scrollToWork}
+                strength={0.3}
+              >
+                <span className="relative z-10 flex items-center gap-3">
+                  VIEW WORK
+                  <ArrowDown className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
+                </span>
+              </MagneticElement>
+
+              <MagneticElement
+                as="button"
+                className="group magnetic-btn relative px-8 md:px-12 py-4 md:py-5 border border-foreground/30 text-foreground font-display font-semibold tracking-wider overflow-hidden hover:border-foreground transition-colors"
+                strength={0.3}
+              >
+                <span className="relative z-10 flex items-center gap-3">
+                  <Play className="w-4 h-4" />
+                  SHOWREEL
+                </span>
+              </MagneticElement>
+            </motion.div>
+
+            {/* Stats Row */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1.8 }}
+              className="flex gap-8 md:gap-12 mt-12 md:mt-16 pt-8 border-t border-border/30"
+            >
+              {[
+                { value: '50+', label: 'Projects' },
+                { value: '$10M+', label: 'Revenue' },
+                { value: '100%', label: 'Satisfaction' },
+              ].map((stat, i) => (
+                <div key={i}>
+                  <span className="text-2xl md:text-4xl font-display font-bold text-accent">{stat.value}</span>
+                  <span className="block text-[10px] md:text-xs text-muted-foreground mt-1 tracking-wider uppercase">{stat.label}</span>
+                </div>
+              ))}
             </motion.div>
           </div>
-        </motion.div>
+
+          {/* Right Column - 3D Portrait */}
+          <div className="order-1 lg:order-2 relative h-[50vh] md:h-[70vh] lg:h-auto">
+            <Hero3DPortrait className="w-full h-full max-w-[500px] mx-auto lg:max-w-none" />
+          </div>
+        </div>
       </motion.div>
 
       {/* Bottom Marquee */}
-      <div className="absolute bottom-0 left-0 right-0 border-t border-border/50 py-6 bg-background/80 backdrop-blur-sm">
+      <div className="absolute bottom-0 left-0 right-0 border-t border-border/50 py-4 md:py-6 bg-background/80 backdrop-blur-sm z-20">
         <TextMarquee
-          text="WEB DESIGN • SALES FUNNELS • 3D EXPERIENCES • BRANDING • UI/UX"
-          className="text-2xl md:text-4xl font-display font-bold text-foreground/10"
-          speed={30}
+          text="WEB DESIGN • SALES FUNNELS • 3D EXPERIENCES • BRANDING • UI/UX • CONVERSION OPTIMIZATION"
+          className="text-xl md:text-3xl lg:text-4xl font-display font-bold text-foreground/10"
+          speed={25}
         />
       </div>
 
@@ -198,12 +186,12 @@ const Hero: React.FC = () => {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 2 }}
-        className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4"
+        transition={{ delay: 2.5 }}
+        className="absolute bottom-20 md:bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-30"
       >
-        <span className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground">Scroll</span>
+        <span className="text-[8px] md:text-[10px] tracking-[0.3em] uppercase text-muted-foreground">Scroll to Explore</span>
         <motion.div
-          className="w-px h-12 bg-gradient-to-b from-foreground to-transparent"
+          className="w-px h-8 md:h-12 bg-gradient-to-b from-accent to-transparent"
           animate={{ scaleY: [1, 0.5, 1], opacity: [1, 0.5, 1] }}
           transition={{ duration: 1.5, repeat: Infinity }}
         />

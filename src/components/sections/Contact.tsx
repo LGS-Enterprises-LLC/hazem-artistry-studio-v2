@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Send, MapPin, Mail, ArrowUpRight } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import { Send, MapPin, Mail, ArrowUpRight, Phone, Calendar, CheckCircle2 } from 'lucide-react';
 import RevealOnScroll from '@/components/RevealOnScroll';
-import SplitText from '@/components/SplitText';
+import KineticText from '@/components/KineticText';
 import MagneticElement from '@/components/MagneticElement';
 
 const Contact: React.FC = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLDivElement>(null);
+  const isFormInView = useInView(formRef, { once: true, margin: '-100px' });
+  
   const [formState, setFormState] = useState({
     name: '',
     email: '',
@@ -15,6 +19,14 @@ const Contact: React.FC = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start end', 'end start'],
+  });
+
+  const y = useTransform(scrollYProgress, [0, 1], [100, -100]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormState({ ...formState, [e.target.name]: e.target.value });
@@ -29,221 +41,334 @@ const Contact: React.FC = () => {
   };
 
   const socials = [
-    { name: 'LinkedIn', url: '#' },
-    { name: 'Twitter', url: '#' },
-    { name: 'Dribbble', url: '#' },
-    { name: 'Instagram', url: '#' },
+    { name: 'LinkedIn', url: '#', icon: '→' },
+    { name: 'Twitter', url: '#', icon: '→' },
+    { name: 'Dribbble', url: '#', icon: '→' },
+    { name: 'Instagram', url: '#', icon: '→' },
+  ];
+
+  const formFields = [
+    { name: 'name', label: 'Your Name', type: 'text', placeholder: 'John Doe', required: true },
+    { name: 'email', label: 'Email Address', type: 'email', placeholder: 'john@example.com', required: true },
   ];
 
   return (
-    <section id="contact" className="relative py-32 md:py-48 bg-secondary noise">
-      {/* Background */}
-      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-accent/5 to-transparent" />
+    <section ref={containerRef} id="contact" className="relative py-32 md:py-48 bg-secondary noise overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute inset-0 grid-pattern opacity-30" />
+      <motion.div 
+        className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-accent/5 to-transparent"
+        style={{ y }}
+      />
       
-      <div className="container mx-auto px-6 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-16 lg:gap-24">
-          {/* Left Column */}
-          <div>
-            <RevealOnScroll>
-              <span className="inline-flex items-center gap-3 text-xs tracking-[0.3em] uppercase text-muted-foreground mb-6">
-                <span className="w-12 h-px bg-accent" />
-                Contact
-              </span>
-            </RevealOnScroll>
-            <h2 className="text-mega font-display mb-8">
-              <SplitText text="LET'S BUILD" delay={0.1} />
-              <br />
-              <span className="text-accent">
-                <SplitText text="SOMETHING" delay={0.3} />
-              </span>
-              <br />
-              <SplitText text="INCREDIBLE" delay={0.5} />
-            </h2>
+      {/* Decorative circle */}
+      <motion.div
+        className="absolute -bottom-[400px] -right-[400px] w-[800px] h-[800px] border border-accent/10 rounded-full"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 120, repeat: Infinity, ease: 'linear' }}
+      />
+      
+      <div className="container mx-auto px-4 md:px-6 relative z-10">
+        {/* Header */}
+        <div className="text-center mb-16 md:mb-24">
+          <RevealOnScroll>
+            <span className="inline-flex items-center gap-3 text-xs tracking-[0.3em] uppercase text-muted-foreground mb-6">
+              <span className="w-12 h-px bg-accent" />
+              Get In Touch
+              <span className="w-12 h-px bg-accent" />
+            </span>
+          </RevealOnScroll>
+          <h2 className="text-[clamp(2rem,8vw,6rem)] font-display font-bold leading-[0.85]">
+            <KineticText text="LET'S BUILD" type="words" animation="fade-up" delay={0.1} />
+            <br />
+            <span className="text-accent">
+              <KineticText text="SOMETHING" type="words" animation="fade-up" delay={0.3} />
+            </span>
+            <br />
+            <KineticText text="INCREDIBLE" type="words" animation="fade-up" delay={0.5} />
+          </h2>
+        </div>
 
-            <RevealOnScroll delay={0.4}>
-              <p className="text-lg text-muted-foreground mb-12 font-body max-w-md">
+        <div className="grid lg:grid-cols-5 gap-12 lg:gap-16">
+          {/* Left Column - Info */}
+          <div className="lg:col-span-2">
+            <RevealOnScroll delay={0.2}>
+              <p className="text-xl text-muted-foreground mb-12 font-body leading-relaxed">
                 Ready to take your digital presence to the next level? 
-                Let's discuss your project and make it happen.
+                Let's discuss your project and create something extraordinary together.
               </p>
             </RevealOnScroll>
 
             {/* Contact Info */}
             <div className="space-y-6 mb-12">
-              <RevealOnScroll delay={0.5}>
-                <a href="mailto:hello@hazemmagdy.com" className="flex items-center gap-4 group">
-                  <div className="w-12 h-12 flex items-center justify-center border border-border group-hover:border-accent transition-colors">
-                    <Mail className="w-5 h-5 text-muted-foreground group-hover:text-accent transition-colors" />
+              <RevealOnScroll delay={0.3}>
+                <motion.a 
+                  href="mailto:hello@hazemmagdy.com" 
+                  className="flex items-center gap-4 group p-4 -mx-4 hover:bg-background/50 transition-colors"
+                  whileHover={{ x: 5 }}
+                >
+                  <div className="w-14 h-14 flex items-center justify-center border border-border group-hover:border-accent group-hover:bg-accent transition-all">
+                    <Mail className="w-5 h-5 text-muted-foreground group-hover:text-accent-foreground transition-colors" />
                   </div>
-                  <span className="text-lg font-body group-hover:text-accent transition-colors">
-                    hello@hazemmagdy.com
-                  </span>
-                </a>
+                  <div>
+                    <span className="text-xs text-muted-foreground uppercase tracking-wider block mb-1">Email</span>
+                    <span className="text-lg font-body group-hover:text-accent transition-colors">
+                      hello@hazemmagdy.com
+                    </span>
+                  </div>
+                </motion.a>
               </RevealOnScroll>
 
-              <RevealOnScroll delay={0.6}>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 flex items-center justify-center border border-border">
+              <RevealOnScroll delay={0.4}>
+                <motion.div 
+                  className="flex items-center gap-4 p-4 -mx-4"
+                  whileHover={{ x: 5 }}
+                >
+                  <div className="w-14 h-14 flex items-center justify-center border border-border">
                     <MapPin className="w-5 h-5 text-muted-foreground" />
                   </div>
-                  <span className="text-lg font-body text-muted-foreground">
-                    Available Worldwide
-                  </span>
-                </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground uppercase tracking-wider block mb-1">Location</span>
+                    <span className="text-lg font-body text-muted-foreground">
+                      Available Worldwide • Remote
+                    </span>
+                  </div>
+                </motion.div>
+              </RevealOnScroll>
+
+              <RevealOnScroll delay={0.5}>
+                <motion.div 
+                  className="flex items-center gap-4 p-4 -mx-4"
+                  whileHover={{ x: 5 }}
+                >
+                  <div className="w-14 h-14 flex items-center justify-center border border-success bg-success/10">
+                    <CheckCircle2 className="w-5 h-5 text-success" />
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground uppercase tracking-wider block mb-1">Availability</span>
+                    <span className="text-lg font-body text-success">
+                      Currently accepting projects
+                    </span>
+                  </div>
+                </motion.div>
               </RevealOnScroll>
             </div>
 
             {/* Socials */}
-            <RevealOnScroll delay={0.7}>
-              <div className="flex flex-wrap gap-4">
-                {socials.map((social, i) => (
-                  <MagneticElement
-                    key={i}
-                    as="a"
-                    href={social.url}
-                    className="group px-6 py-3 border border-border hover:border-foreground hover:bg-foreground transition-all"
-                    strength={0.3}
-                  >
-                    <span className="flex items-center gap-2 text-sm font-body group-hover:text-background transition-colors">
-                      {social.name}
-                      <ArrowUpRight className="w-3 h-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                    </span>
-                  </MagneticElement>
-                ))}
+            <RevealOnScroll delay={0.6}>
+              <div className="border-t border-border pt-8">
+                <span className="text-xs text-muted-foreground uppercase tracking-wider block mb-6">Follow Me</span>
+                <div className="flex flex-wrap gap-3">
+                  {socials.map((social, i) => (
+                    <MagneticElement
+                      key={i}
+                      as="a"
+                      href={social.url}
+                      className="group px-6 py-3 border border-border hover:border-foreground hover:bg-foreground transition-all"
+                      strength={0.3}
+                    >
+                      <span className="flex items-center gap-2 text-sm font-body group-hover:text-background transition-colors">
+                        {social.name}
+                        <ArrowUpRight className="w-3 h-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                      </span>
+                    </MagneticElement>
+                  ))}
+                </div>
               </div>
             </RevealOnScroll>
           </div>
 
           {/* Right Column - Form */}
-          <RevealOnScroll delay={0.3} direction="right">
-            <div className="bg-background p-8 md:p-12 border border-border">
+          <div ref={formRef} className="lg:col-span-3">
+            <motion.div 
+              className="bg-background p-8 md:p-12 border border-border relative overflow-hidden"
+              initial={{ opacity: 0, y: 60 }}
+              animate={isFormInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
+            >
+              {/* Corner accents */}
+              <div className="absolute top-0 left-0 w-20 h-20 border-t-2 border-l-2 border-accent/30" />
+              <div className="absolute bottom-0 right-0 w-20 h-20 border-b-2 border-r-2 border-accent/30" />
+              
               {isSubmitted ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-12"
+                  className="text-center py-16"
                 >
                   <motion.div
-                    className="w-20 h-20 mx-auto mb-6 flex items-center justify-center bg-accent"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.2, type: 'spring' }}
+                    className="w-24 h-24 mx-auto mb-8 flex items-center justify-center bg-accent"
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
                   >
-                    <Send className="w-8 h-8 text-accent-foreground" />
+                    <CheckCircle2 className="w-12 h-12 text-accent-foreground" />
                   </motion.div>
-                  <h3 className="text-2xl font-display font-bold mb-4">Message Sent!</h3>
-                  <p className="text-muted-foreground font-body">
+                  <motion.h3 
+                    className="text-3xl font-display font-bold mb-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    Message Sent!
+                  </motion.h3>
+                  <motion.p 
+                    className="text-muted-foreground font-body text-lg"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                  >
                     Thanks for reaching out. I'll get back to you within 24 hours.
-                  </p>
+                  </motion.p>
                 </motion.div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-8">
-                  <div>
-                    <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-2 font-body">
-                      Your Name *
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formState.name}
-                      onChange={handleChange}
-                      required
-                      className="form-input"
-                      placeholder="John Doe"
-                    />
+                  {/* Name & Email Row */}
+                  <div className="grid md:grid-cols-2 gap-8">
+                    {formFields.map((field, i) => (
+                      <motion.div 
+                        key={field.name}
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={isFormInView ? { opacity: 1, y: 0 } : {}}
+                        transition={{ delay: 0.1 + i * 0.1 }}
+                      >
+                        <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-3 font-body">
+                          {field.label} {field.required && '*'}
+                        </label>
+                        <div className="relative">
+                          <input
+                            type={field.type}
+                            name={field.name}
+                            value={formState[field.name as keyof typeof formState]}
+                            onChange={handleChange}
+                            onFocus={() => setFocusedField(field.name)}
+                            onBlur={() => setFocusedField(null)}
+                            required={field.required}
+                            className="w-full bg-transparent border-b-2 border-border py-4 text-lg focus:outline-none focus:border-accent transition-colors font-body"
+                            placeholder={field.placeholder}
+                          />
+                          <motion.div
+                            className="absolute bottom-0 left-0 h-0.5 bg-accent"
+                            initial={{ scaleX: 0 }}
+                            animate={{ scaleX: focusedField === field.name ? 1 : 0 }}
+                            transition={{ duration: 0.3 }}
+                            style={{ transformOrigin: 'left' }}
+                          />
+                        </div>
+                      </motion.div>
+                    ))}
                   </div>
 
-                  <div>
-                    <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-2 font-body">
-                      Email Address *
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formState.email}
-                      onChange={handleChange}
-                      required
-                      className="form-input"
-                      placeholder="john@example.com"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-2 font-body">
-                      Project Type
-                    </label>
-                    <select
-                      name="projectType"
-                      value={formState.projectType}
-                      onChange={handleChange}
-                      className="form-input appearance-none bg-transparent"
+                  {/* Project Type & Budget Row */}
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <motion.div
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={isFormInView ? { opacity: 1, y: 0 } : {}}
+                      transition={{ delay: 0.3 }}
                     >
-                      <option value="">Select a project type</option>
-                      <option value="website">Website Design</option>
-                      <option value="funnel">Sales Funnel</option>
-                      <option value="ecommerce">E-commerce</option>
-                      <option value="saas">SaaS Product</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
+                      <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-3 font-body">
+                        Project Type
+                      </label>
+                      <select
+                        name="projectType"
+                        value={formState.projectType}
+                        onChange={handleChange}
+                        className="w-full bg-transparent border-b-2 border-border py-4 text-lg focus:outline-none focus:border-accent transition-colors font-body appearance-none cursor-pointer"
+                      >
+                        <option value="" className="bg-background">Select a project type</option>
+                        <option value="website" className="bg-background">Website Design</option>
+                        <option value="funnel" className="bg-background">Sales Funnel</option>
+                        <option value="ecommerce" className="bg-background">E-commerce</option>
+                        <option value="saas" className="bg-background">SaaS Product</option>
+                        <option value="other" className="bg-background">Other</option>
+                      </select>
+                    </motion.div>
 
-                  <div>
-                    <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-2 font-body">
-                      Budget Range
-                    </label>
-                    <select
-                      name="budget"
-                      value={formState.budget}
-                      onChange={handleChange}
-                      className="form-input appearance-none bg-transparent"
+                    <motion.div
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={isFormInView ? { opacity: 1, y: 0 } : {}}
+                      transition={{ delay: 0.4 }}
                     >
-                      <option value="">Select a budget range</option>
-                      <option value="5-10k">$5,000 - $10,000</option>
-                      <option value="10-25k">$10,000 - $25,000</option>
-                      <option value="25-50k">$25,000 - $50,000</option>
-                      <option value="50k+">$50,000+</option>
-                    </select>
+                      <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-3 font-body">
+                        Budget Range
+                      </label>
+                      <select
+                        name="budget"
+                        value={formState.budget}
+                        onChange={handleChange}
+                        className="w-full bg-transparent border-b-2 border-border py-4 text-lg focus:outline-none focus:border-accent transition-colors font-body appearance-none cursor-pointer"
+                      >
+                        <option value="" className="bg-background">Select a budget range</option>
+                        <option value="5-10k" className="bg-background">$5,000 - $10,000</option>
+                        <option value="10-25k" className="bg-background">$10,000 - $25,000</option>
+                        <option value="25-50k" className="bg-background">$25,000 - $50,000</option>
+                        <option value="50k+" className="bg-background">$50,000+</option>
+                      </select>
+                    </motion.div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-2 font-body">
+                  {/* Message */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={isFormInView ? { opacity: 1, y: 0 } : {}}
+                    transition={{ delay: 0.5 }}
+                  >
+                    <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-3 font-body">
                       Project Details *
                     </label>
                     <textarea
                       name="message"
                       value={formState.message}
                       onChange={handleChange}
+                      onFocus={() => setFocusedField('message')}
+                      onBlur={() => setFocusedField(null)}
                       required
                       rows={4}
-                      className="form-input resize-none"
-                      placeholder="Tell me about your project..."
+                      className="w-full bg-transparent border-b-2 border-border py-4 text-lg focus:outline-none focus:border-accent transition-colors font-body resize-none"
+                      placeholder="Tell me about your project, goals, and timeline..."
                     />
-                  </div>
+                  </motion.div>
 
-                  <motion.button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full py-5 bg-accent text-accent-foreground font-display font-semibold tracking-wider relative overflow-hidden"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                  {/* Submit Button */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={isFormInView ? { opacity: 1, y: 0 } : {}}
+                    transition={{ delay: 0.6 }}
                   >
-                    <span className={`flex items-center justify-center gap-3 ${isSubmitting ? 'opacity-0' : ''}`}>
-                      SEND MESSAGE
-                      <Send className="w-4 h-4" />
-                    </span>
-                    {isSubmitting && (
+                    <motion.button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full py-6 bg-accent text-accent-foreground font-display font-bold text-lg tracking-wider relative overflow-hidden group"
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                    >
+                      <span className={`flex items-center justify-center gap-3 transition-opacity ${isSubmitting ? 'opacity-0' : ''}`}>
+                        SEND MESSAGE
+                        <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                      </span>
+                      {isSubmitting && (
+                        <motion.div
+                          className="absolute inset-0 flex items-center justify-center"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                        >
+                          <div className="w-6 h-6 border-2 border-accent-foreground border-t-transparent rounded-full animate-spin" />
+                        </motion.div>
+                      )}
+                      
+                      {/* Hover effect */}
                       <motion.div
-                        className="absolute inset-0 flex items-center justify-center"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                      >
-                        <div className="w-5 h-5 border-2 border-accent-foreground border-t-transparent rounded-full animate-spin" />
-                      </motion.div>
-                    )}
-                  </motion.button>
+                        className="absolute inset-0 bg-foreground"
+                        initial={{ y: '100%' }}
+                        whileHover={{ y: 0 }}
+                        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                      />
+                    </motion.button>
+                  </motion.div>
                 </form>
               )}
-            </div>
-          </RevealOnScroll>
+            </motion.div>
+          </div>
         </div>
       </div>
     </section>
