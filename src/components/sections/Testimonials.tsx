@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Quote, Star, Play } from 'lucide-react';
-import RevealOnScroll from '@/components/RevealOnScroll';
-import KineticText from '@/components/KineticText';
+import { ChevronLeft, ChevronRight, Quote, Star } from 'lucide-react';
+import ScrollReveal from '@/components/ScrollReveal';
 
 const testimonials = [
   {
@@ -22,12 +21,12 @@ const testimonials = [
     role: 'Founder, NovaBrand',
     company: 'NovaBrand',
     metric: '5x',
-    metricLabel: 'More Qualified Leads',
+    metricLabel: 'More Leads',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80',
   },
   {
     id: 3,
-    quote: "The sales funnel Hazem built for us generated $1.2M in the first month alone. His understanding of conversion psychology is unmatched in the industry.",
+    quote: "The sales funnel Hazem built for us generated $1.2M in the first month alone. His understanding of conversion psychology is unmatched.",
     author: 'Emily Rodriguez',
     role: 'CMO, ScaleUp Co.',
     company: 'ScaleUp',
@@ -42,7 +41,7 @@ const testimonials = [
     role: 'CTO, InnovateTech',
     company: 'InnovateTech',
     metric: '40%',
-    metricLabel: 'Lower Bounce Rate',
+    metricLabel: 'Lower Bounce',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
   },
 ];
@@ -74,35 +73,41 @@ const Testimonials: React.FC = () => {
 
   const slideVariants = {
     enter: (direction: number) => ({
-      x: direction > 0 ? 300 : -300,
+      x: direction > 0 ? 400 : -400,
       opacity: 0,
-      scale: 0.95,
+      scale: 0.9,
+      rotateY: direction > 0 ? 15 : -15,
     }),
     center: {
       zIndex: 1,
       x: 0,
       opacity: 1,
       scale: 1,
+      rotateY: 0,
     },
     exit: (direction: number) => ({
       zIndex: 0,
-      x: direction < 0 ? 300 : -300,
+      x: direction < 0 ? 400 : -400,
       opacity: 0,
-      scale: 0.95,
+      scale: 0.9,
+      rotateY: direction < 0 ? 15 : -15,
     }),
   };
 
   const currentTestimonial = testimonials[currentIndex];
 
   return (
-    <section ref={containerRef} id="testimonials" className="relative py-32 md:py-48 bg-card noise overflow-hidden">
+    <section ref={containerRef} id="testimonials" className="relative py-32 md:py-48 bg-card overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 grid-pattern opacity-20" />
-      <div className="absolute top-0 left-0 w-1/3 h-full bg-gradient-to-r from-accent/5 to-transparent" />
+      <div className="absolute inset-0 noise pointer-events-none" />
       
-      {/* Large quote mark */}
+      {/* Accent gradient */}
+      <div className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-accent/5 to-transparent" />
+      
+      {/* Large quote marks */}
       <motion.div
-        className="absolute top-1/4 right-[10%] text-[400px] font-display font-bold text-foreground/[0.02] leading-none pointer-events-none select-none"
+        className="absolute top-1/4 right-[5%] text-[500px] font-display font-black text-foreground/[0.02] leading-none pointer-events-none select-none hidden lg:block"
         initial={{ opacity: 0, x: 100 }}
         animate={isInView ? { opacity: 1, x: 0 } : {}}
         transition={{ duration: 1, delay: 0.5 }}
@@ -114,51 +119,54 @@ const Testimonials: React.FC = () => {
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
           {/* Left Column - Header */}
           <div>
-            <RevealOnScroll>
+            <ScrollReveal animation="fade-up">
               <span className="inline-flex items-center gap-3 text-xs tracking-[0.3em] uppercase text-muted-foreground mb-6">
                 <span className="w-12 h-px bg-accent" />
                 Testimonials
               </span>
-            </RevealOnScroll>
-            <h2 className="text-[clamp(2rem,6vw,5rem)] font-display font-bold leading-[0.85] mb-8">
-              <KineticText text="WHAT CLIENTS" type="words" animation="fade-up" delay={0.1} />
-              <br />
-              <span className="text-accent">
-                <KineticText text="SAY" type="words" animation="fade-up" delay={0.3} />
-              </span>
-            </h2>
+            </ScrollReveal>
+            
+            <ScrollReveal animation="fade-up" delay={0.1}>
+              <h2 className="text-[clamp(2.5rem,8vw,6rem)] font-display font-black leading-[0.85] mb-8 tracking-tighter">
+                WHAT CLIENTS <span className="text-accent">SAY</span>
+              </h2>
+            </ScrollReveal>
 
-            <RevealOnScroll delay={0.4}>
+            <ScrollReveal animation="fade-up" delay={0.2}>
               <p className="text-lg text-muted-foreground mb-12 font-body max-w-md">
                 Don't just take my word for it. Here's what industry leaders have to say 
                 about our collaboration.
               </p>
-            </RevealOnScroll>
+            </ScrollReveal>
 
             {/* Stats */}
-            <RevealOnScroll delay={0.5}>
-              <div className="grid grid-cols-3 gap-4 mb-12">
-                <div className="text-center p-4 border border-border/50">
-                  <span className="block text-3xl md:text-4xl font-display font-bold text-accent">50+</span>
-                  <span className="text-xs text-muted-foreground">Happy Clients</span>
-                </div>
-                <div className="text-center p-4 border border-border/50">
-                  <span className="block text-3xl md:text-4xl font-display font-bold text-accent">$10M+</span>
-                  <span className="text-xs text-muted-foreground">Revenue Generated</span>
-                </div>
-                <div className="text-center p-4 border border-border/50">
-                  <span className="block text-3xl md:text-4xl font-display font-bold text-accent">5★</span>
-                  <span className="text-xs text-muted-foreground">Average Rating</span>
-                </div>
+            <ScrollReveal animation="fade-up" delay={0.3}>
+              <div className="grid grid-cols-3 gap-1 mb-12 bg-border/50">
+                {[
+                  { value: '50+', label: 'Happy Clients' },
+                  { value: '$10M+', label: 'Revenue Generated' },
+                  { value: '5★', label: 'Average Rating' },
+                ].map((stat, i) => (
+                  <motion.div 
+                    key={i}
+                    className="text-center p-6 bg-background"
+                    whileHover={{ backgroundColor: 'hsl(var(--secondary))' }}
+                  >
+                    <span className="block text-2xl md:text-3xl font-display font-black text-accent">
+                      {stat.value}
+                    </span>
+                    <span className="text-xs text-muted-foreground">{stat.label}</span>
+                  </motion.div>
+                ))}
               </div>
-            </RevealOnScroll>
+            </ScrollReveal>
 
             {/* Navigation */}
-            <RevealOnScroll delay={0.6}>
+            <ScrollReveal animation="fade-up" delay={0.4}>
               <div className="flex items-center gap-4">
                 <motion.button
                   onClick={prev}
-                  className="w-14 h-14 flex items-center justify-center border border-border hover:border-accent hover:bg-accent hover:text-accent-foreground transition-all"
+                  className="w-14 h-14 flex items-center justify-center border-2 border-border hover:border-accent hover:bg-accent hover:text-accent-foreground transition-all"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -166,23 +174,27 @@ const Testimonials: React.FC = () => {
                 </motion.button>
                 <motion.button
                   onClick={next}
-                  className="w-14 h-14 flex items-center justify-center border border-border hover:border-accent hover:bg-accent hover:text-accent-foreground transition-all"
+                  className="w-14 h-14 flex items-center justify-center border-2 border-border hover:border-accent hover:bg-accent hover:text-accent-foreground transition-all"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <ChevronRight className="w-5 h-5" />
                 </motion.button>
-                <span className="ml-4 text-sm text-muted-foreground font-body">
-                  <span className="text-foreground font-semibold">{String(currentIndex + 1).padStart(2, '0')}</span>
-                  {' / '}
-                  {String(testimonials.length).padStart(2, '0')}
-                </span>
+                <div className="ml-4 flex items-center gap-2">
+                  <span className="text-3xl font-display font-black text-accent">
+                    {String(currentIndex + 1).padStart(2, '0')}
+                  </span>
+                  <span className="text-muted-foreground">/</span>
+                  <span className="text-sm text-muted-foreground">
+                    {String(testimonials.length).padStart(2, '0')}
+                  </span>
+                </div>
               </div>
-            </RevealOnScroll>
+            </ScrollReveal>
           </div>
 
           {/* Right Column - Testimonial Card */}
-          <div className="relative min-h-[500px]">
+          <div className="relative min-h-[550px]" style={{ perspective: 1000 }}>
             <AnimatePresence mode="wait" custom={direction}>
               <motion.div
                 key={currentIndex}
@@ -191,38 +203,77 @@ const Testimonials: React.FC = () => {
                 initial="enter"
                 animate="center"
                 exit="exit"
-                transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+                transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
                 className="absolute inset-0"
               >
                 <div className="bg-background border border-border p-8 md:p-12 h-full relative overflow-hidden">
                   {/* Corner accents */}
-                  <div className="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-accent/30" />
-                  <div className="absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-accent/30" />
+                  <motion.div 
+                    className="absolute top-0 left-0 w-20 h-20 border-t-2 border-l-2 border-accent"
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.3 }}
+                  />
+                  <motion.div 
+                    className="absolute bottom-0 right-0 w-20 h-20 border-b-2 border-r-2 border-accent"
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.4 }}
+                  />
                   
                   {/* Quote Icon */}
                   <div className="flex items-center gap-4 mb-8">
-                    <Quote className="w-10 h-10 text-accent" />
+                    <motion.div
+                      initial={{ rotate: -20, scale: 0 }}
+                      animate={{ rotate: 0, scale: 1 }}
+                      transition={{ delay: 0.2, type: 'spring' }}
+                    >
+                      <Quote className="w-12 h-12 text-accent" />
+                    </motion.div>
                     <div className="flex gap-1">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-accent text-accent" />
+                        <motion.div
+                          key={i}
+                          initial={{ scale: 0, rotate: -180 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          transition={{ delay: 0.3 + i * 0.05, type: 'spring' }}
+                        >
+                          <Star className="w-5 h-5 fill-accent text-accent" />
+                        </motion.div>
                       ))}
                     </div>
                   </div>
                   
                   {/* Quote */}
-                  <blockquote className="text-xl md:text-2xl font-display leading-relaxed mb-10">
+                  <motion.blockquote 
+                    className="text-xl md:text-2xl font-display leading-relaxed mb-10"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                  >
                     "{currentTestimonial.quote}"
-                  </blockquote>
+                  </motion.blockquote>
 
                   {/* Author */}
-                  <div className="flex items-center gap-4">
+                  <motion.div 
+                    className="flex items-center gap-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                  >
                     <div className="relative">
-                      <img
+                      <motion.img
                         src={currentTestimonial.avatar}
                         alt={currentTestimonial.author}
-                        className="w-16 h-16 rounded-full object-cover grayscale"
+                        className="w-16 h-16 rounded-full object-cover"
+                        initial={{ filter: 'grayscale(100%)' }}
+                        whileHover={{ filter: 'grayscale(0%)' }}
                       />
-                      <div className="absolute inset-0 rounded-full border-2 border-accent" />
+                      <motion.div 
+                        className="absolute inset-0 rounded-full border-2 border-accent"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
+                      />
                     </div>
                     <div className="flex-1">
                       <p className="font-display font-bold text-lg">
@@ -234,21 +285,24 @@ const Testimonials: React.FC = () => {
                     </div>
                     
                     {/* Metric Badge */}
-                    <div className="text-right">
-                      <span className="block text-3xl font-display font-bold text-accent">
+                    <motion.div 
+                      className="text-right p-4 bg-accent/10 border border-accent/30"
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      <span className="block text-2xl md:text-3xl font-display font-black text-accent">
                         {currentTestimonial.metric}
                       </span>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
                         {currentTestimonial.metricLabel}
                       </span>
-                    </div>
-                  </div>
+                    </motion.div>
+                  </motion.div>
                 </div>
               </motion.div>
             </AnimatePresence>
 
             {/* Progress bar */}
-            <div className="absolute -bottom-8 left-0 right-0 flex gap-2">
+            <div className="absolute -bottom-12 left-0 right-0 flex gap-2">
               {testimonials.map((_, index) => (
                 <motion.button
                   key={index}
@@ -256,18 +310,19 @@ const Testimonials: React.FC = () => {
                     setDirection(index > currentIndex ? 1 : -1);
                     setCurrentIndex(index);
                   }}
-                  className="relative flex-1 h-1 bg-border overflow-hidden"
+                  className="relative flex-1 h-1.5 bg-border overflow-hidden rounded-full"
+                  whileHover={{ scale: 1.1 }}
                 >
                   {index === currentIndex && (
                     <motion.div
-                      className="absolute inset-y-0 left-0 bg-accent"
+                      className="absolute inset-y-0 left-0 bg-accent rounded-full"
                       initial={{ width: '0%' }}
                       animate={{ width: '100%' }}
                       transition={{ duration: 8, ease: 'linear' }}
                     />
                   )}
                   {index < currentIndex && (
-                    <div className="absolute inset-0 bg-accent" />
+                    <div className="absolute inset-0 bg-accent rounded-full" />
                   )}
                 </motion.button>
               ))}
