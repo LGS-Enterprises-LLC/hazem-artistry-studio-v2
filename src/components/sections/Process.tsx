@@ -1,9 +1,9 @@
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import { Search, Palette, Code2, Rocket, HeartHandshake, ArrowRight, Check } from 'lucide-react';
-import RevealOnScroll from '@/components/RevealOnScroll';
-import KineticText from '@/components/KineticText';
+import { Search, Palette, Code2, Rocket, HeartHandshake, Check } from 'lucide-react';
+import ScrollReveal from '@/components/ScrollReveal';
 import MagneticElement from '@/components/MagneticElement';
+import { ArrowRight } from 'lucide-react';
 
 const steps = [
   {
@@ -56,17 +56,17 @@ const ProcessStep: React.FC<{ step: typeof steps[0]; index: number; isLast: bool
     <motion.div
       ref={stepRef}
       className="relative group"
-      initial={{ opacity: 0, x: -50 }}
+      initial={{ opacity: 0, x: -80 }}
       animate={isInView ? { opacity: 1, x: 0 } : {}}
-      transition={{ duration: 0.8, delay: index * 0.15, ease: [0.23, 1, 0.32, 1] }}
+      transition={{ duration: 0.8, delay: index * 0.15, ease: [0.25, 0.1, 0.25, 1] }}
     >
-      {/* Connection line */}
+      {/* Connection line with animation */}
       {!isLast && (
         <motion.div
-          className="absolute left-6 top-20 bottom-0 w-px bg-border"
-          initial={{ scaleY: 0 }}
-          animate={isInView ? { scaleY: 1 } : {}}
-          transition={{ duration: 0.8, delay: 0.3 + index * 0.15 }}
+          className="absolute left-6 top-24 bottom-0 w-px bg-gradient-to-b from-accent via-border to-border"
+          initial={{ scaleY: 0, opacity: 0 }}
+          animate={isInView ? { scaleY: 1, opacity: 1 } : {}}
+          transition={{ duration: 1, delay: 0.3 + index * 0.15 }}
           style={{ transformOrigin: 'top' }}
         />
       )}
@@ -76,69 +76,87 @@ const ProcessStep: React.FC<{ step: typeof steps[0]; index: number; isLast: bool
         <div className="relative flex-shrink-0">
           <motion.div
             className="w-12 h-12 flex items-center justify-center bg-background border-2 border-border group-hover:border-accent group-hover:bg-accent transition-all duration-500 z-10 relative"
-            whileHover={{ scale: 1.1 }}
+            whileHover={{ scale: 1.15, rotate: 5 }}
           >
             <span className="text-sm font-display font-bold group-hover:text-accent-foreground transition-colors">
               {step.number}
             </span>
           </motion.div>
           
-          {/* Animated ring */}
+          {/* Pulsing ring */}
           <motion.div
-            className="absolute inset-0 border-2 border-accent/50 rounded-full"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={isInView ? { scale: 1.5, opacity: [0, 0.5, 0] } : {}}
-            transition={{ duration: 2, delay: 0.5 + index * 0.15, repeat: Infinity, repeatDelay: 3 }}
+            className="absolute inset-0 border-2 border-accent"
+            initial={{ scale: 1, opacity: 0 }}
+            animate={isInView ? { 
+              scale: [1, 2, 2],
+              opacity: [0, 0.5, 0],
+            } : {}}
+            transition={{ duration: 2, delay: 0.5 + index * 0.2, repeat: Infinity, repeatDelay: 4 }}
           />
         </div>
 
         {/* Content */}
-        <div className="flex-1">
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 p-6 md:p-8 border border-border/50 bg-background/50 backdrop-blur-sm hover:border-accent/50 transition-all duration-500 group-hover:bg-secondary/30">
+        <motion.div 
+          className="flex-1 p-8 md:p-10 border border-border/50 bg-background/50 backdrop-blur-sm group-hover:border-accent/50 group-hover:bg-secondary/30 transition-all duration-500"
+          whileHover={{ x: 10 }}
+        >
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
             {/* Left side */}
             <div className="flex-1">
               {/* Icon & Title */}
               <div className="flex items-center gap-4 mb-4">
                 <motion.div
-                  className="w-12 h-12 flex items-center justify-center border border-border group-hover:border-accent transition-colors"
+                  className="w-14 h-14 flex items-center justify-center border border-border group-hover:border-accent group-hover:bg-accent/10 transition-all"
                   whileHover={{ rotate: 10 }}
                 >
-                  <step.icon className="w-5 h-5 text-muted-foreground group-hover:text-accent transition-colors" />
+                  <step.icon className="w-6 h-6 text-muted-foreground group-hover:text-accent transition-colors" />
                 </motion.div>
                 <div>
-                  <h3 className="text-xl md:text-2xl font-display font-bold group-hover:text-accent transition-colors">
+                  <h3 className="text-2xl md:text-3xl font-display font-bold group-hover:text-accent transition-colors">
                     {step.title}
                   </h3>
-                  <span className="text-xs text-muted-foreground">{step.duration}</span>
+                  <motion.span 
+                    className="text-xs text-muted-foreground px-3 py-1 bg-secondary/50 inline-block mt-2"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    {step.duration}
+                  </motion.span>
                 </div>
               </div>
 
               {/* Description */}
-              <p className="text-muted-foreground font-body leading-relaxed max-w-xl">
+              <p className="text-muted-foreground font-body leading-relaxed max-w-xl text-lg">
                 {step.description}
               </p>
             </div>
 
             {/* Right side - Deliverables */}
-            <div className="lg:w-64 flex-shrink-0">
-              <span className="text-xs uppercase tracking-wider text-muted-foreground mb-3 block">Deliverables</span>
-              <ul className="space-y-2">
+            <div className="lg:w-72 flex-shrink-0 p-6 bg-secondary/30 border border-border/30">
+              <span className="text-xs uppercase tracking-wider text-accent mb-4 block font-display">
+                Deliverables
+              </span>
+              <ul className="space-y-3">
                 {step.deliverables.map((item, i) => (
                   <motion.li
                     key={i}
-                    className="flex items-center gap-2 text-sm font-body"
-                    initial={{ opacity: 0, x: 10 }}
+                    className="flex items-center gap-3 text-sm font-body"
+                    initial={{ opacity: 0, x: 20 }}
                     animate={isInView ? { opacity: 1, x: 0 } : {}}
                     transition={{ delay: 0.5 + index * 0.1 + i * 0.05 }}
                   >
-                    <Check className="w-4 h-4 text-accent flex-shrink-0" />
-                    <span>{item}</span>
+                    <motion.div
+                      className="w-5 h-5 flex items-center justify-center bg-accent/20 text-accent"
+                      whileHover={{ scale: 1.2, rotate: 180 }}
+                    >
+                      <Check className="w-3 h-3" />
+                    </motion.div>
+                    <span className="text-foreground/80">{item}</span>
                   </motion.li>
                 ))}
               </ul>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </motion.div>
   );
@@ -155,36 +173,39 @@ const Process: React.FC = () => {
   const y = useTransform(scrollYProgress, [0, 1], [50, -50]);
 
   return (
-    <section ref={containerRef} id="process" className="relative py-32 md:py-48 noise overflow-hidden">
+    <section ref={containerRef} id="process" className="relative py-32 md:py-48 overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0 grid-pattern opacity-30" />
+      <div className="absolute inset-0 grid-pattern opacity-20" />
+      <div className="absolute inset-0 noise pointer-events-none" />
+      
       <motion.div
-        className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[150px]"
+        className="absolute bottom-0 right-0 w-[800px] h-[800px] bg-accent/5 rounded-full blur-[200px]"
         style={{ y }}
       />
       
       <div className="container mx-auto px-4 md:px-6 relative z-10">
         {/* Section Header */}
         <div className="text-center mb-16 md:mb-24">
-          <RevealOnScroll>
+          <ScrollReveal animation="fade-up">
             <span className="inline-flex items-center gap-3 text-xs tracking-[0.3em] uppercase text-muted-foreground mb-6">
               <span className="w-12 h-px bg-accent" />
               Process
               <span className="w-12 h-px bg-accent" />
             </span>
-          </RevealOnScroll>
-          <h2 className="text-[clamp(2.5rem,8vw,7rem)] font-display font-bold leading-[0.85]">
-            <KineticText text="HOW I" type="words" animation="fade-up" delay={0.1} />
-            <span className="text-stroke ml-4">
-              <KineticText text="WORK" type="words" animation="fade-up" delay={0.3} />
-            </span>
-          </h2>
-          <RevealOnScroll delay={0.4}>
+          </ScrollReveal>
+          
+          <ScrollReveal animation="fade-up" delay={0.1}>
+            <h2 className="text-[clamp(3rem,10vw,8rem)] font-display font-black leading-[0.85] tracking-tighter">
+              HOW I <span className="text-stroke-thick">WORK</span>
+            </h2>
+          </ScrollReveal>
+          
+          <ScrollReveal animation="fade-up" delay={0.2}>
             <p className="max-w-2xl mx-auto mt-8 text-lg text-muted-foreground font-body">
               A proven methodology refined over years of working with ambitious brands.
               Every project follows this battle-tested process.
             </p>
-          </RevealOnScroll>
+          </ScrollReveal>
         </div>
 
         {/* Process Steps */}
@@ -200,11 +221,15 @@ const Process: React.FC = () => {
         </div>
 
         {/* CTA */}
-        <RevealOnScroll delay={0.6}>
+        <ScrollReveal animation="fade-up" delay={0.6}>
           <div className="text-center mt-16 md:mt-24 py-16 border-t border-border/30">
-            <p className="text-xl text-muted-foreground mb-8 font-body">
+            <motion.p 
+              className="text-2xl text-muted-foreground mb-8 font-body"
+              animate={{ opacity: [0.7, 1, 0.7] }}
+              transition={{ duration: 3, repeat: Infinity }}
+            >
               Ready to start your project?
-            </p>
+            </motion.p>
             <MagneticElement
               as="a"
               href="#contact"
@@ -215,7 +240,7 @@ const Process: React.FC = () => {
               <ArrowRight className="w-5 h-5" />
             </MagneticElement>
           </div>
-        </RevealOnScroll>
+        </ScrollReveal>
       </div>
     </section>
   );

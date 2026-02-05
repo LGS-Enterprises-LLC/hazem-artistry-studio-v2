@@ -1,14 +1,62 @@
-import React, { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { ArrowDown, Play } from 'lucide-react';
+import React, { useRef, useEffect } from 'react';
+import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
+import { ArrowDown, Play, Sparkles } from 'lucide-react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Hero3DPortrait from '@/components/Hero3DPortrait';
-import KineticText from '@/components/KineticText';
-import TextMarquee from '@/components/TextMarquee';
 import MagneticElement from '@/components/MagneticElement';
-import HeroBackground from '@/components/HeroBackground';
+import MorphingShape from '@/components/MorphingShape';
+
+gsap.registerPlugin(ScrollTrigger);
+
+const AnimatedLetter: React.FC<{ char: string; index: number; total: number }> = ({ char, index, total }) => {
+  return (
+    <motion.span
+      className="inline-block"
+      initial={{ opacity: 0, y: 100, rotateX: 90 }}
+      animate={{ opacity: 1, y: 0, rotateX: 0 }}
+      transition={{
+        duration: 1,
+        delay: 0.5 + index * 0.04,
+        ease: [0.25, 0.1, 0.25, 1],
+      }}
+      whileHover={{
+        y: -10,
+        color: 'hsl(var(--accent))',
+        transition: { duration: 0.2 },
+      }}
+      style={{ transformOrigin: 'bottom' }}
+    >
+      {char === ' ' ? '\u00A0' : char}
+    </motion.span>
+  );
+};
+
+const SplitHeadline: React.FC<{ text: string; className?: string; delay?: number }> = ({ 
+  text, 
+  className = '',
+  delay = 0,
+}) => {
+  const chars = text.split('');
+  return (
+    <span className={`inline-flex flex-wrap ${className}`}>
+      {chars.map((char, i) => (
+        <AnimatedLetter key={i} char={char} index={i + delay * 10} total={chars.length} />
+      ))}
+    </span>
+  );
+};
 
 const Hero: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const headlineRef = useRef<HTMLDivElement>(null);
+  
+  const mouseX = useMotionValue(0.5);
+  const mouseY = useMotionValue(0.5);
+  
+  const springConfig = { damping: 30, stiffness: 100 };
+  const smoothMouseX = useSpring(mouseX, springConfig);
+  const smoothMouseY = useSpring(mouseY, springConfig);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -18,6 +66,17 @@ const Hero: React.FC = () => {
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.9]);
   const y = useTransform(scrollYProgress, [0, 1], [0, 300]);
+  const blur = useTransform(scrollYProgress, [0, 0.5], [0, 10]);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX / window.innerWidth);
+      mouseY.set(e.clientY / window.innerHeight);
+    };
+    
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [mouseX, mouseY]);
 
   const scrollToWork = () => {
     document.getElementById('work')?.scrollIntoView({ behavior: 'smooth' });
@@ -26,45 +85,57 @@ const Hero: React.FC = () => {
   return (
     <section
       ref={containerRef}
-      className="relative min-h-screen flex flex-col justify-center overflow-hidden noise"
+      className="relative min-h-screen flex flex-col justify-center overflow-hidden"
     >
-      {/* 3D Particle Background */}
-      <HeroBackground />
-      
-      {/* Grid Pattern */}
-      <div className="absolute inset-0 grid-pattern" />
-      
-      {/* Animated gradient orbs */}
-      <motion.div
-        className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full blur-[150px] opacity-20"
-        style={{ background: 'radial-gradient(circle, hsl(var(--accent)) 0%, transparent 70%)' }}
-        animate={{ 
-          scale: [1, 1.2, 1],
-          x: [0, 50, 0],
-          y: [0, -30, 0],
-        }}
-        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      
-      <motion.div
-        className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full blur-[120px] opacity-15"
-        style={{ background: 'radial-gradient(circle, hsl(0, 0%, 100%) 0%, transparent 70%)' }}
-        animate={{ 
-          scale: [1.2, 1, 1.2],
-          x: [0, -30, 0],
-          y: [0, 50, 0],
-        }}
-        transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-      />
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0">
+        {/* Grid Pattern */}
+        <div className="absolute inset-0 grid-pattern opacity-40" />
+        
+        {/* Morphing Accent Shapes */}
+        <MorphingShape 
+          className="top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2" 
+          color="hsl(var(--accent))"
+          size={600}
+          intensity={30}
+        />
+        <MorphingShape 
+          className="bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2" 
+          color="hsl(0 0% 100% / 0.3)"
+          size={400}
+          intensity={40}
+        />
+        
+        {/* Animated lines */}
+        <motion.div 
+          className="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-transparent via-accent/30 to-transparent"
+          initial={{ scaleY: 0 }}
+          animate={{ scaleY: 1 }}
+          transition={{ duration: 2, delay: 0.5 }}
+        />
+        <motion.div 
+          className="absolute top-0 right-1/3 w-px h-full bg-gradient-to-b from-transparent via-foreground/10 to-transparent"
+          initial={{ scaleY: 0 }}
+          animate={{ scaleY: 1 }}
+          transition={{ duration: 2, delay: 0.8 }}
+        />
+      </div>
+
+      {/* Noise Overlay */}
+      <div className="absolute inset-0 noise pointer-events-none" />
 
       {/* Main Content */}
       <motion.div
         className="relative z-10 container mx-auto px-4 md:px-6 pt-24 md:pt-32 pb-20"
-        style={{ opacity, scale, y }}
+        style={{ 
+          opacity, 
+          scale,
+          filter: useTransform(blur, (v) => `blur(${v}px)`),
+        }}
       >
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center min-h-[80vh]">
           {/* Left Column - Typography */}
-          <div className="order-2 lg:order-1">
+          <div className="order-2 lg:order-1" ref={headlineRef}>
             {/* Top Badge */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -72,33 +143,34 @@ const Hero: React.FC = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="mb-6 md:mb-8"
             >
-              <span className="inline-flex items-center gap-3 text-[10px] md:text-xs tracking-[0.3em] uppercase text-muted-foreground">
-                <motion.span 
-                  className="w-8 md:w-12 h-px bg-accent"
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ duration: 0.8, delay: 0.4 }}
-                />
-                Elite Web Design Agency
-              </span>
+              <motion.span 
+                className="inline-flex items-center gap-3 px-4 py-2 border border-accent/30 bg-accent/5 backdrop-blur-sm"
+                whileHover={{ scale: 1.05, borderColor: 'hsl(var(--accent))' }}
+              >
+                <Sparkles className="w-4 h-4 text-accent" />
+                <span className="text-[10px] md:text-xs tracking-[0.3em] uppercase text-foreground/80">
+                  Elite Web Design Agency
+                </span>
+              </motion.span>
             </motion.div>
 
             {/* Main Headline - Giant Typography */}
-            <div className="mb-8 md:mb-12">
-              <h1 className="text-[clamp(2.5rem,10vw,10rem)] font-display font-extrabold leading-[0.85] tracking-tight">
+            <div className="mb-8 md:mb-12 overflow-hidden">
+              <h1 className="text-[clamp(2.5rem,10vw,9rem)] font-display font-black leading-[0.85] tracking-tighter">
                 <span className="block overflow-hidden">
-                  <KineticText text="WE CREATE" delay={0.3} type="words" animation="fade-up" />
+                  <SplitHeadline text="WE CREATE" />
                 </span>
-                <span className="block overflow-hidden text-stroke">
-                  <KineticText text="DIGITAL" delay={0.6} type="words" animation="fade-up" />
+                <span className="block overflow-hidden text-stroke-thick">
+                  <SplitHeadline text="DIGITAL" delay={1} />
                 </span>
                 <span className="block overflow-hidden relative">
-                  <KineticText text="EXPERIENCES" delay={0.9} type="words" animation="fade-up" />
+                  <SplitHeadline text="EXPERIENCES" delay={2} />
                   <motion.span
-                    className="absolute -bottom-1 md:-bottom-2 left-0 w-full h-1 md:h-2 bg-accent"
-                    initial={{ scaleX: 0, originX: 0 }}
+                    className="absolute -bottom-2 left-0 h-2 md:h-3 bg-accent origin-left"
+                    initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
-                    transition={{ duration: 1.2, delay: 1.8, ease: [0.23, 1, 0.32, 1] }}
+                    transition={{ duration: 1.2, delay: 2, ease: [0.25, 0.1, 0.25, 1] }}
+                    style={{ width: '100%' }}
                   />
                 </span>
               </h1>
@@ -108,18 +180,26 @@ const Hero: React.FC = () => {
             <motion.p
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1.4 }}
+              transition={{ duration: 0.8, delay: 1.8 }}
               className="max-w-lg text-base md:text-xl text-muted-foreground leading-relaxed font-body mb-8 md:mb-12"
             >
               World-class web design agency crafting high-converting websites and sales funnels 
-              that generate <span className="text-accent font-semibold">$10M+</span> for ambitious brands worldwide.
+              that generate <motion.span 
+                className="text-accent font-bold"
+                animate={{ 
+                  textShadow: ['0 0 0px hsl(var(--accent))', '0 0 20px hsl(var(--accent))', '0 0 0px hsl(var(--accent))'],
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                $10M+
+              </motion.span> for ambitious brands worldwide.
             </motion.p>
 
             {/* CTAs */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1.6 }}
+              transition={{ duration: 0.8, delay: 2 }}
               className="flex flex-wrap gap-4"
             >
               <MagneticElement
@@ -130,19 +210,41 @@ const Hero: React.FC = () => {
               >
                 <span className="relative z-10 flex items-center gap-3">
                   VIEW WORK
-                  <ArrowDown className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
+                  <motion.span
+                    animate={{ y: [0, 3, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    <ArrowDown className="w-4 h-4" />
+                  </motion.span>
                 </span>
+                <motion.div
+                  className="absolute inset-0 bg-foreground"
+                  initial={{ y: '100%' }}
+                  whileHover={{ y: 0 }}
+                  transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                />
               </MagneticElement>
 
               <MagneticElement
                 as="button"
-                className="group magnetic-btn relative px-8 md:px-12 py-4 md:py-5 border border-foreground/30 text-foreground font-display font-semibold tracking-wider overflow-hidden hover:border-foreground transition-colors"
+                className="group magnetic-btn relative px-8 md:px-12 py-4 md:py-5 border-2 border-foreground/30 text-foreground font-display font-semibold tracking-wider overflow-hidden hover:border-foreground"
                 strength={0.3}
               >
-                <span className="relative z-10 flex items-center gap-3">
-                  <Play className="w-4 h-4" />
+                <span className="relative z-10 flex items-center gap-3 group-hover:text-background transition-colors duration-300">
+                  <motion.span
+                    className="w-10 h-10 flex items-center justify-center border border-current rounded-full"
+                    whileHover={{ scale: 1.1 }}
+                  >
+                    <Play className="w-4 h-4 ml-0.5" />
+                  </motion.span>
                   SHOWREEL
                 </span>
+                <motion.div
+                  className="absolute inset-0 bg-foreground"
+                  initial={{ x: '-100%' }}
+                  whileHover={{ x: 0 }}
+                  transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                />
               </MagneticElement>
             </motion.div>
 
@@ -150,7 +252,7 @@ const Hero: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1.8 }}
+              transition={{ duration: 0.8, delay: 2.2 }}
               className="flex gap-8 md:gap-12 mt-12 md:mt-16 pt-8 border-t border-border/30"
             >
               {[
@@ -158,43 +260,86 @@ const Hero: React.FC = () => {
                 { value: '$10M+', label: 'Revenue' },
                 { value: '100%', label: 'Satisfaction' },
               ].map((stat, i) => (
-                <div key={i}>
-                  <span className="text-2xl md:text-4xl font-display font-bold text-accent">{stat.value}</span>
-                  <span className="block text-[10px] md:text-xs text-muted-foreground mt-1 tracking-wider uppercase">{stat.label}</span>
-                </div>
+                <motion.div 
+                  key={i}
+                  whileHover={{ y: -5 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <motion.span 
+                    className="text-2xl md:text-4xl font-display font-bold text-accent block"
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 2.4 + i * 0.1, type: 'spring' }}
+                  >
+                    {stat.value}
+                  </motion.span>
+                  <span className="block text-[10px] md:text-xs text-muted-foreground mt-1 tracking-wider uppercase">
+                    {stat.label}
+                  </span>
+                </motion.div>
               ))}
             </motion.div>
           </div>
 
           {/* Right Column - 3D Portrait */}
-          <div className="order-1 lg:order-2 relative h-[50vh] md:h-[70vh] lg:h-auto">
+          <motion.div 
+            className="order-1 lg:order-2 relative h-[50vh] md:h-[70vh] lg:h-auto"
+            style={{
+              x: useTransform(smoothMouseX, [0, 1], [-20, 20]),
+              y: useTransform(smoothMouseY, [0, 1], [-20, 20]),
+            }}
+          >
             <Hero3DPortrait className="w-full h-full max-w-[500px] mx-auto lg:max-w-none" />
-          </div>
+            
+            {/* Floating Elements around portrait */}
+            <motion.div
+              className="absolute -top-8 -right-8 w-24 h-24 border-2 border-accent/50"
+              animate={{ rotate: [0, 90, 0] }}
+              transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+            />
+            <motion.div
+              className="absolute -bottom-4 -left-4 w-16 h-16 bg-accent/20 backdrop-blur-sm"
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 4, repeat: Infinity }}
+            />
+          </motion.div>
         </div>
       </motion.div>
 
       {/* Bottom Marquee */}
-      <div className="absolute bottom-0 left-0 right-0 border-t border-border/50 py-4 md:py-6 bg-background/80 backdrop-blur-sm z-20">
-        <TextMarquee
-          text="WEB DESIGN • SALES FUNNELS • 3D EXPERIENCES • BRANDING • UI/UX • CONVERSION OPTIMIZATION"
-          className="text-xl md:text-3xl lg:text-4xl font-display font-bold text-foreground/10"
-          speed={25}
-        />
+      <div className="absolute bottom-0 left-0 right-0 border-t border-border/50 py-4 md:py-6 bg-background/80 backdrop-blur-sm z-20 overflow-hidden">
+        <motion.div
+          className="flex whitespace-nowrap"
+          animate={{ x: [0, -2000] }}
+          transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+        >
+          {[...Array(4)].map((_, i) => (
+            <span key={i} className="text-xl md:text-3xl lg:text-4xl font-display font-bold text-foreground/10 mx-8">
+              WEB DESIGN • SALES FUNNELS • 3D EXPERIENCES • BRANDING • UI/UX • CONVERSION OPTIMIZATION •
+            </span>
+          ))}
+        </motion.div>
       </div>
 
       {/* Scroll Indicator */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 2.5 }}
+        transition={{ delay: 3 }}
         className="absolute bottom-20 md:bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-30"
       >
-        <span className="text-[8px] md:text-[10px] tracking-[0.3em] uppercase text-muted-foreground">Scroll to Explore</span>
+        <span className="text-[8px] md:text-[10px] tracking-[0.3em] uppercase text-muted-foreground">
+          Scroll to Explore
+        </span>
         <motion.div
-          className="w-px h-8 md:h-12 bg-gradient-to-b from-accent to-transparent"
-          animate={{ scaleY: [1, 0.5, 1], opacity: [1, 0.5, 1] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-        />
+          className="w-6 h-10 border border-foreground/30 rounded-full flex items-start justify-center p-2"
+        >
+          <motion.div
+            className="w-1 h-2 bg-accent rounded-full"
+            animate={{ y: [0, 12, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          />
+        </motion.div>
       </motion.div>
     </section>
   );

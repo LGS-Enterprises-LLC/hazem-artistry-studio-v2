@@ -1,48 +1,66 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import RevealOnScroll from '@/components/RevealOnScroll';
-import KineticText from '@/components/KineticText';
-import TextMarquee from '@/components/TextMarquee';
+import ScrollReveal from '@/components/ScrollReveal';
 
 const techStack = [
-  { name: 'React', category: 'Frontend', level: 95 },
-  { name: 'Next.js', category: 'Frontend', level: 92 },
-  { name: 'TypeScript', category: 'Frontend', level: 90 },
-  { name: 'Tailwind', category: 'Styling', level: 98 },
-  { name: 'GSAP', category: 'Animation', level: 88 },
-  { name: 'Framer Motion', category: 'Animation', level: 95 },
-  { name: 'Three.js', category: '3D', level: 82 },
-  { name: 'WebGL', category: '3D', level: 78 },
-  { name: 'Figma', category: 'Design', level: 96 },
-  { name: 'Photoshop', category: 'Design', level: 88 },
-  { name: 'Node.js', category: 'Backend', level: 85 },
-  { name: 'Vercel', category: 'Deploy', level: 94 },
+  { name: 'React', category: 'Frontend', level: 95, icon: '⚛️' },
+  { name: 'Next.js', category: 'Frontend', level: 92, icon: '▲' },
+  { name: 'TypeScript', category: 'Frontend', level: 90, icon: 'TS' },
+  { name: 'Tailwind', category: 'Styling', level: 98, icon: '🎨' },
+  { name: 'GSAP', category: 'Animation', level: 88, icon: '✨' },
+  { name: 'Framer Motion', category: 'Animation', level: 95, icon: '🎬' },
+  { name: 'Three.js', category: '3D', level: 82, icon: '🎮' },
+  { name: 'WebGL', category: '3D', level: 78, icon: '🌐' },
+  { name: 'Figma', category: 'Design', level: 96, icon: '🎯' },
+  { name: 'Node.js', category: 'Backend', level: 85, icon: '🟢' },
+  { name: 'Vercel', category: 'Deploy', level: 94, icon: '▲' },
+  { name: 'Supabase', category: 'Backend', level: 88, icon: '⚡' },
 ];
 
 const TechCard: React.FC<{ tech: typeof techStack[0]; index: number }> = ({ tech, index }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(cardRef, { once: true, margin: '-50px' });
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <motion.div
       ref={cardRef}
       className="group relative p-6 md:p-8 border border-border/50 bg-background/50 backdrop-blur-sm overflow-hidden cursor-pointer"
-      initial={{ opacity: 0, y: 40, scale: 0.95 }}
-      animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
-      transition={{ duration: 0.6, delay: index * 0.05, ease: [0.23, 1, 0.32, 1] }}
-      whileHover={{ y: -8, borderColor: 'hsl(var(--accent))' }}
+      initial={{ opacity: 0, y: 60, rotateX: 20 }}
+      animate={isInView ? { opacity: 1, y: 0, rotateX: 0 } : {}}
+      transition={{ duration: 0.8, delay: index * 0.05, ease: [0.25, 0.1, 0.25, 1] }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      whileHover={{ y: -10, borderColor: 'hsl(var(--accent))' }}
+      style={{ transformPerspective: 1000 }}
     >
-      {/* Glow effect on hover */}
+      {/* Animated glow effect */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-br from-accent/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        className="absolute inset-0 bg-gradient-to-br from-accent/20 via-transparent to-transparent"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isHovered ? 1 : 0 }}
+        transition={{ duration: 0.4 }}
       />
+      
+      {/* Animated border */}
+      <motion.div
+        className="absolute inset-0 border-2 border-accent pointer-events-none"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isHovered ? 1 : 0 }}
+      />
+      
+      {/* Icon */}
+      <motion.div
+        className="text-4xl mb-4"
+        animate={{ rotate: isHovered ? 10 : 0, scale: isHovered ? 1.2 : 1 }}
+        transition={{ type: 'spring', stiffness: 300 }}
+      >
+        {tech.icon}
+      </motion.div>
       
       {/* Category badge */}
       <motion.span 
         className="inline-block px-3 py-1 text-[10px] uppercase tracking-wider text-accent bg-accent/10 mb-4 font-body"
-        initial={{ opacity: 0, x: -20 }}
-        animate={isInView ? { opacity: 1, x: 0 } : {}}
-        transition={{ delay: 0.3 + index * 0.05 }}
       >
         {tech.category}
       </motion.span>
@@ -53,34 +71,63 @@ const TechCard: React.FC<{ tech: typeof techStack[0]; index: number }> = ({ tech
       </h3>
       
       {/* Skill bar */}
-      <div className="relative h-1 bg-border/30 overflow-hidden">
+      <div className="relative h-1.5 bg-border/30 overflow-hidden rounded-full">
         <motion.div
-          className="absolute inset-y-0 left-0 bg-accent"
+          className="absolute inset-y-0 left-0 bg-gradient-to-r from-accent to-accent/70 rounded-full"
           initial={{ width: 0 }}
           animate={isInView ? { width: `${tech.level}%` } : { width: 0 }}
-          transition={{ duration: 1.2, delay: 0.5 + index * 0.05, ease: [0.23, 1, 0.32, 1] }}
+          transition={{ duration: 1.2, delay: 0.5 + index * 0.05, ease: [0.25, 0.1, 0.25, 1] }}
+        />
+        {/* Animated shimmer */}
+        <motion.div
+          className="absolute inset-y-0 w-20 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+          initial={{ x: '-100%' }}
+          animate={isInView ? { x: '400%' } : {}}
+          transition={{ duration: 2, delay: 1.5 + index * 0.1 }}
         />
       </div>
       
       {/* Percentage */}
       <motion.span
-        className="absolute top-6 right-6 text-5xl font-display font-bold text-foreground/[0.03] group-hover:text-accent/10 transition-colors"
-        initial={{ opacity: 0 }}
-        animate={isInView ? { opacity: 1 } : {}}
-        transition={{ delay: 0.6 + index * 0.05 }}
+        className="absolute top-4 right-4 text-5xl font-display font-black text-foreground/[0.03] group-hover:text-accent/10 transition-colors"
       >
         {tech.level}%
       </motion.span>
       
       {/* Corner accent */}
       <motion.div
-        className="absolute bottom-0 right-0 w-12 h-12 bg-accent/10"
+        className="absolute bottom-0 right-0 w-16 h-16 bg-accent/20"
         initial={{ scale: 0 }}
-        animate={isInView ? { scale: 1 } : { scale: 0 }}
-        transition={{ delay: 0.7 + index * 0.05 }}
+        animate={isHovered ? { scale: 1 } : { scale: 0 }}
+        transition={{ type: 'spring' }}
         style={{ clipPath: 'polygon(100% 0, 0% 100%, 100% 100%)' }}
       />
     </motion.div>
+  );
+};
+
+const InfiniteMarquee: React.FC<{ items: string[]; reverse?: boolean; speed?: number }> = ({ 
+  items, 
+  reverse = false,
+  speed = 30,
+}) => {
+  return (
+    <div className="overflow-hidden py-6">
+      <motion.div
+        className="flex whitespace-nowrap"
+        animate={{ x: reverse ? ['-50%', '0%'] : ['0%', '-50%'] }}
+        transition={{ duration: speed, repeat: Infinity, ease: 'linear' }}
+      >
+        {[...items, ...items].map((item, i) => (
+          <span
+            key={i}
+            className="text-4xl md:text-7xl font-display font-black text-foreground/[0.03] mx-8 select-none"
+          >
+            {item}
+          </span>
+        ))}
+      </motion.div>
+    </div>
   );
 };
 
@@ -94,44 +141,54 @@ const TechStack: React.FC = () => {
 
   const y = useTransform(scrollYProgress, [0, 1], [100, -100]);
 
+  const marqueeItems1 = ['REACT', 'NEXT.JS', 'TYPESCRIPT', 'TAILWIND', 'GSAP', 'THREE.JS'];
+  const marqueeItems2 = ['FRAMER MOTION', 'WEBGL', 'FIGMA', 'NODE.JS', 'VERCEL', 'SUPABASE'];
+
   return (
-    <section ref={containerRef} id="tech" className="relative py-32 md:py-48 noise overflow-hidden">
+    <section ref={containerRef} id="tech" className="relative py-32 md:py-48 overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 grid-pattern opacity-20" />
+      <div className="absolute inset-0 noise pointer-events-none" />
+      
       <motion.div 
-        className="absolute inset-0 bg-gradient-radial from-accent/5 to-transparent"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-accent/5 rounded-full blur-[200px]"
         style={{ y }}
       />
       
       {/* Floating elements */}
       <motion.div
-        className="absolute top-1/4 left-[5%] w-64 h-64 border border-accent/10 rotate-45"
-        animate={{ rotate: [45, 135, 45] }}
-        transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+        className="absolute top-1/4 left-[5%] w-40 h-40 border-2 border-accent/10"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
+      />
+      <motion.div
+        className="absolute bottom-1/4 right-[10%] w-24 h-24 bg-accent/10"
+        animate={{ scale: [1, 1.3, 1], rotate: [0, 45, 0] }}
+        transition={{ duration: 8, repeat: Infinity }}
       />
       
       <div className="container mx-auto px-4 md:px-6 relative z-10">
         {/* Section Header */}
         <div className="text-center mb-16 md:mb-24">
-          <RevealOnScroll>
+          <ScrollReveal animation="fade-up">
             <span className="inline-flex items-center gap-3 text-xs tracking-[0.3em] uppercase text-muted-foreground mb-6">
               <span className="w-12 h-px bg-accent" />
               Tech Stack
               <span className="w-12 h-px bg-accent" />
             </span>
-          </RevealOnScroll>
-          <h2 className="text-[clamp(2.5rem,8vw,7rem)] font-display font-bold leading-[0.85]">
-            <KineticText text="TOOLS OF THE" type="words" animation="fade-up" delay={0.1} />
-            <br />
-            <span className="text-stroke">
-              <KineticText text="TRADE" type="words" animation="fade-up" delay={0.3} />
-            </span>
-          </h2>
-          <RevealOnScroll delay={0.4}>
+          </ScrollReveal>
+          
+          <ScrollReveal animation="fade-up" delay={0.1}>
+            <h2 className="text-[clamp(3rem,10vw,8rem)] font-display font-black leading-[0.85] tracking-tighter">
+              TOOLS OF THE <span className="text-stroke-thick">TRADE</span>
+            </h2>
+          </ScrollReveal>
+          
+          <ScrollReveal animation="fade-up" delay={0.2}>
             <p className="max-w-2xl mx-auto mt-8 text-lg text-muted-foreground font-body">
               Mastering the latest technologies to deliver cutting-edge digital experiences.
             </p>
-          </RevealOnScroll>
+          </ScrollReveal>
         </div>
 
         {/* Tech Grid */}
@@ -140,27 +197,13 @@ const TechStack: React.FC = () => {
             <TechCard key={index} tech={tech} index={index} />
           ))}
         </div>
+      </div>
 
-        {/* Scrolling Text */}
-        <div className="border-y border-border/30 py-8 -mx-4 md:-mx-6">
-          <TextMarquee
-            text="REACT • NEXT.JS • TYPESCRIPT • TAILWIND • GSAP • THREE.JS • FRAMER MOTION • WEBGL"
-            className="text-3xl md:text-6xl font-display font-bold text-foreground/5"
-            speed={20}
-            separator="•"
-          />
-        </div>
-        
-        {/* Reverse marquee */}
-        <div className="border-b border-border/30 py-8 -mx-4 md:-mx-6">
-          <TextMarquee
-            text="FIGMA • PHOTOSHOP • NODE.JS • VERCEL • SUPABASE • PRISMA • POSTGRES • STRIPE"
-            className="text-3xl md:text-6xl font-display font-bold text-foreground/5"
-            speed={20}
-            reverse={true}
-            separator="•"
-          />
-        </div>
+      {/* Scrolling Text Marquees */}
+      <div className="border-y border-border/20 bg-secondary/30">
+        <InfiniteMarquee items={marqueeItems1} speed={40} />
+        <div className="border-t border-border/10" />
+        <InfiniteMarquee items={marqueeItems2} speed={35} reverse />
       </div>
     </section>
   );
