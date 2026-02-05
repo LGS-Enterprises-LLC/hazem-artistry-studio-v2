@@ -1,109 +1,152 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Quote, Star } from 'lucide-react';
-import FadeIn from '@/components/FadeIn';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Quote } from 'lucide-react';
+import RevealOnScroll from '@/components/RevealOnScroll';
+import SplitText from '@/components/SplitText';
 
 const testimonials = [
   {
-    name: 'Sarah Chen',
-    role: 'CEO, TechFlow',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80',
-    content: "Hazem completely transformed our online presence. The website he built doesn't just look incredible—it's generated over $2M in additional revenue for us.",
-    rating: 5,
+    id: 1,
+    quote: "Hazem is a rare talent. He doesn't just design websites—he crafts experiences that convert. Our revenue increased by 300% after launching the new site.",
+    author: 'Sarah Johnson',
+    role: 'CEO, TechStart Inc.',
+    metric: '+300% Revenue',
   },
   {
-    name: 'Marcus Johnson',
-    role: 'Founder, Innovate Labs',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
-    content: "Working with Hazem was a game-changer. His attention to detail and understanding of conversion optimization took our funnel from 2% to 8% conversion rate.",
-    rating: 5,
+    id: 2,
+    quote: "Working with Hazem was a game-changer. The attention to detail and creativity exceeded our expectations. Our brand has never looked better.",
+    author: 'Michael Chen',
+    role: 'Founder, NovaBrand',
+    metric: '5x More Leads',
   },
   {
-    name: 'Elena Rodriguez',
-    role: 'Marketing Director, Scale Up',
-    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80',
-    content: "The animations and interactions Hazem created are on another level. Every client meeting now starts with 'Who built your website?' Pure magic.",
-    rating: 5,
+    id: 3,
+    quote: "The sales funnel Hazem built for us generated $1.2M in the first month alone. His understanding of conversion psychology is unmatched.",
+    author: 'Emily Rodriguez',
+    role: 'CMO, ScaleUp Co.',
+    metric: '$1.2M in 30 Days',
   },
 ];
 
 const Testimonials: React.FC = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const next = () => {
+    setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+  };
+
+  const prev = () => {
+    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  };
+
   return (
-    <section id="testimonials" className="relative py-32 overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-accent/5 to-background" />
-      </div>
-
+    <section id="testimonials" className="relative py-32 md:py-48 bg-card noise">
+      {/* Background Accent */}
+      <div className="absolute top-0 left-0 w-1/3 h-full bg-accent/5" />
+      
       <div className="container mx-auto px-6 relative z-10">
-        {/* Header */}
-        <div className="text-center mb-20">
-          <FadeIn>
-            <span className="inline-block px-4 py-1.5 rounded-full border border-accent/30 bg-accent/10 text-accent text-sm font-medium mb-4">
-              Testimonials
-            </span>
-          </FadeIn>
-
-          <FadeIn delay={0.1}>
-            <h2 className="font-display font-bold text-4xl md:text-5xl lg:text-6xl mb-6">
-              Client <span className="text-gradient">Results</span>
+        <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+          {/* Left Column - Header */}
+          <div>
+            <RevealOnScroll>
+              <span className="inline-flex items-center gap-3 text-xs tracking-[0.3em] uppercase text-muted-foreground mb-6">
+                <span className="w-12 h-px bg-accent" />
+                Testimonials
+              </span>
+            </RevealOnScroll>
+            <h2 className="text-mega font-display mb-8">
+              <SplitText text="WHAT CLIENTS" delay={0.1} />
+              <br />
+              <span className="text-accent">
+                <SplitText text="SAY" delay={0.3} />
+              </span>
             </h2>
-          </FadeIn>
 
-          <FadeIn delay={0.2}>
-            <p className="max-w-2xl mx-auto text-lg text-muted-foreground">
-              Don't just take my word for it. Here's what my clients have to say 
-              about working together.
-            </p>
-          </FadeIn>
-        </div>
+            <RevealOnScroll delay={0.4}>
+              <p className="text-lg text-muted-foreground mb-8 font-body">
+                Don't just take my word for it. Here's what clients have to say 
+                about working together.
+              </p>
+            </RevealOnScroll>
 
-        {/* Testimonials Grid */}
-        <div className="grid md:grid-cols-3 gap-8">
-          {testimonials.map((testimonial, index) => (
-            <FadeIn key={testimonial.name} delay={0.1 + index * 0.15}>
+            {/* Navigation */}
+            <RevealOnScroll delay={0.5}>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={prev}
+                  className="w-14 h-14 flex items-center justify-center border border-border hover:border-foreground hover:bg-foreground hover:text-background transition-all"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={next}
+                  className="w-14 h-14 flex items-center justify-center border border-border hover:border-foreground hover:bg-foreground hover:text-background transition-all"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+                <span className="ml-4 text-sm text-muted-foreground font-body">
+                  {String(currentIndex + 1).padStart(2, '0')} / {String(testimonials.length).padStart(2, '0')}
+                </span>
+              </div>
+            </RevealOnScroll>
+          </div>
+
+          {/* Right Column - Testimonial Card */}
+          <div className="relative">
+            <AnimatePresence mode="wait">
               <motion.div
-                className="group relative p-8 rounded-2xl bg-card border border-border/50 h-full"
-                whileHover={{ y: -8, borderColor: 'hsl(217, 91%, 60%, 0.3)' }}
-                transition={{ duration: 0.3 }}
+                key={currentIndex}
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+                className="testimonial-card relative"
               >
                 {/* Quote Icon */}
-                <Quote className="w-10 h-10 text-accent/30 mb-6" />
-
-                {/* Content */}
-                <p className="text-muted-foreground leading-relaxed mb-8 italic">
-                  "{testimonial.content}"
-                </p>
-
-                {/* Rating */}
-                <div className="flex gap-1 mb-6">
-                  {Array.from({ length: testimonial.rating }).map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-brand-gold text-brand-gold" />
-                  ))}
-                </div>
+                <Quote className="w-12 h-12 text-accent mb-8" />
+                
+                {/* Quote */}
+                <blockquote className="text-xl md:text-2xl font-display leading-relaxed mb-8">
+                  "{testimonials[currentIndex].quote}"
+                </blockquote>
 
                 {/* Author */}
-                <div className="flex items-center gap-4">
-                  <img
-                    src={testimonial.image}
-                    alt={testimonial.name}
-                    className="w-12 h-12 rounded-full object-cover border-2 border-border"
-                  />
+                <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-display font-bold text-foreground">
-                      {testimonial.name}
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      {testimonial.role}
+                    <p className="font-display font-bold text-lg">
+                      {testimonials[currentIndex].author}
                     </p>
+                    <p className="text-muted-foreground text-sm font-body">
+                      {testimonials[currentIndex].role}
+                    </p>
+                  </div>
+                  
+                  {/* Metric Badge */}
+                  <div className="px-4 py-2 bg-accent text-accent-foreground">
+                    <span className="text-sm font-display font-bold">
+                      {testimonials[currentIndex].metric}
+                    </span>
                   </div>
                 </div>
 
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                {/* Decorative Corner */}
+                <div className="absolute -bottom-4 -right-4 w-24 h-24 border border-accent" />
               </motion.div>
-            </FadeIn>
-          ))}
+            </AnimatePresence>
+
+            {/* Dots Indicator */}
+            <div className="flex gap-2 mt-8">
+              {testimonials.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentIndex(index)}
+                  className={`w-12 h-1 transition-colors ${
+                    index === currentIndex ? 'bg-accent' : 'bg-border'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>

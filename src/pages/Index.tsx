@@ -1,4 +1,5 @@
 import useSmoothScroll from '@/hooks/useSmoothScroll';
+import CustomCursor from '@/components/CustomCursor';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/sections/Hero';
 import About from '@/components/sections/About';
@@ -15,6 +16,7 @@ const Index = () => {
 
   return (
     <div className="relative min-h-screen bg-background text-foreground overflow-x-hidden">
+      <CustomCursor />
       <Navbar />
       <main>
         <Hero />
