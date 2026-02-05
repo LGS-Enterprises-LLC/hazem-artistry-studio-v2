@@ -1,139 +1,124 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ExternalLink, ArrowUpRight } from 'lucide-react';
-import FadeIn from '@/components/FadeIn';
-import TiltCard from '@/components/TiltCard';
+import { ArrowUpRight } from 'lucide-react';
+import RevealOnScroll from '@/components/RevealOnScroll';
+import SplitText from '@/components/SplitText';
 
 interface Project {
   id: number;
   title: string;
   category: string;
-  description: string;
-  image: string;
   tags: string[];
-  featured?: boolean;
-  colSpan?: number;
-  rowSpan?: number;
+  image: string;
+  size: 'large' | 'medium' | 'small';
 }
 
 const projects: Project[] = [
   {
     id: 1,
-    title: 'Lumina E-Commerce',
+    title: 'E-Commerce Revolution',
     category: 'E-commerce',
-    description: 'A revolutionary shopping experience with 3D product visualization',
+    tags: ['Web Design', 'Development'],
     image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
-    tags: ['React', 'Three.js', 'Shopify'],
-    featured: true,
-    colSpan: 2,
-    rowSpan: 2,
+    size: 'large',
   },
   {
     id: 2,
-    title: 'FinanceFlow',
+    title: 'SaaS Dashboard',
     category: 'SaaS',
-    description: 'Modern fintech dashboard with real-time analytics',
+    tags: ['UI/UX', 'Product Design'],
     image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80',
-    tags: ['Next.js', 'TypeScript', 'Charts'],
+    size: 'medium',
   },
   {
     id: 3,
-    title: 'Artistry Studio',
-    category: 'Portfolio',
-    description: 'Creative agency showcase with immersive animations',
+    title: 'High-Converting Funnel',
+    category: 'Funnels',
+    tags: ['Sales Funnel', 'CRO'],
     image: 'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&q=80',
-    tags: ['GSAP', 'WebGL', 'Framer'],
+    size: 'medium',
   },
   {
     id: 4,
-    title: 'NutriLife',
-    category: 'Landing Page',
-    description: 'High-converting health supplement funnel',
+    title: 'Brand Experience',
+    category: 'Websites',
+    tags: ['3D', 'Interactive'],
     image: 'https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=800&q=80',
-    tags: ['Funnel', 'A/B Testing', 'CRO'],
-    colSpan: 2,
+    size: 'large',
   },
   {
     id: 5,
-    title: 'TechVault',
-    category: 'SaaS',
-    description: 'Enterprise security platform with sleek UI',
+    title: 'Luxury Real Estate',
+    category: 'Websites',
+    tags: ['Web Design', 'Animation'],
     image: 'https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=800&q=80',
-    tags: ['React', 'Node.js', 'Security'],
+    size: 'medium',
   },
   {
     id: 6,
-    title: 'Wanderlust Travel',
-    category: 'E-commerce',
-    description: 'Immersive travel booking experience',
+    title: 'Crypto Platform',
+    category: 'SaaS',
+    tags: ['Dashboard', 'Web3'],
     image: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&q=80',
-    tags: ['Next.js', 'Maps API', 'Stripe'],
+    size: 'medium',
   },
 ];
 
-const categories = ['All', 'E-commerce', 'SaaS', 'Portfolio', 'Landing Page'];
+const categories = ['All', 'Websites', 'Funnels', 'E-commerce', 'SaaS'];
 
 const Portfolio: React.FC = () => {
-  const [filter, setFilter] = useState('All');
+  const [activeCategory, setActiveCategory] = useState('All');
   const [hoveredProject, setHoveredProject] = useState<number | null>(null);
 
-  const filteredProjects = filter === 'All' 
-    ? projects 
-    : projects.filter(p => p.category === filter);
+  const filteredProjects = activeCategory === 'All'
+    ? projects
+    : projects.filter(p => p.category === activeCategory);
 
   return (
-    <section id="work" className="relative py-32 overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-secondary/20 to-background" />
-      
-      <div className="container mx-auto px-6 relative z-10">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <FadeIn>
-            <span className="inline-block px-4 py-1.5 rounded-full border border-accent/30 bg-accent/10 text-accent text-sm font-medium mb-4">
-              Portfolio
-            </span>
-          </FadeIn>
-          
-          <FadeIn delay={0.1}>
-            <h2 className="font-display font-bold text-4xl md:text-5xl lg:text-6xl mb-6">
-              Featured <span className="text-gradient">Work</span>
+    <section id="work" className="relative py-32 md:py-48 noise">
+      <div className="container mx-auto px-6">
+        {/* Section Header */}
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-16">
+          <div>
+            <RevealOnScroll>
+              <span className="inline-flex items-center gap-3 text-xs tracking-[0.3em] uppercase text-muted-foreground mb-6">
+                <span className="w-12 h-px bg-accent" />
+                Selected Work
+              </span>
+            </RevealOnScroll>
+            <h2 className="text-mega font-display">
+              <SplitText text="FEATURED" delay={0.1} />
+              <br />
+              <span className="text-stroke">
+                <SplitText text="PROJECTS" delay={0.3} />
+              </span>
             </h2>
-          </FadeIn>
-          
-          <FadeIn delay={0.2}>
-            <p className="max-w-2xl mx-auto text-lg text-muted-foreground">
-              A collection of projects where design meets performance, 
-              creating unforgettable digital experiences.
-            </p>
-          </FadeIn>
+          </div>
+
+          {/* Filter Buttons */}
+          <RevealOnScroll delay={0.3}>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setActiveCategory(category)}
+                  className={`px-5 py-2.5 text-sm font-body transition-all duration-300 ${
+                    activeCategory === category
+                      ? 'bg-foreground text-background'
+                      : 'bg-transparent text-muted-foreground hover:text-foreground border border-border hover:border-foreground'
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          </RevealOnScroll>
         </div>
 
-        {/* Filter Buttons */}
-        <FadeIn delay={0.3}>
-          <div className="flex flex-wrap justify-center gap-3 mb-12">
-            {categories.map((category) => (
-              <motion.button
-                key={category}
-                onClick={() => setFilter(category)}
-                className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
-                  filter === category
-                    ? 'bg-foreground text-background'
-                    : 'bg-secondary border border-border hover:border-accent/50'
-                }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {category}
-              </motion.button>
-            ))}
-          </div>
-        </FadeIn>
-
-        {/* Bento Grid */}
-        <motion.div 
+        {/* Projects Grid - Bento Style */}
+        <motion.div
           layout
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[280px]"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         >
           <AnimatePresence mode="popLayout">
             {filteredProjects.map((project, index) => (
@@ -143,125 +128,109 @@ const Portfolio: React.FC = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
-                className={`
-                  ${project.colSpan === 2 ? 'md:col-span-2' : 'col-span-1'}
-                  ${project.rowSpan === 2 ? 'md:row-span-2' : 'row-span-1'}
-                `}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className={`project-card relative group ${
+                  project.size === 'large'
+                    ? 'md:col-span-2 md:row-span-2 aspect-square md:aspect-auto min-h-[400px]'
+                    : 'aspect-[4/3]'
+                }`}
+                onMouseEnter={() => setHoveredProject(project.id)}
+                onMouseLeave={() => setHoveredProject(null)}
               >
-                <TiltCard className="h-full">
+                {/* Image */}
+                <div className="absolute inset-0 bg-secondary overflow-hidden">
+                  <img
+                    src={project.image}
+                    alt={project.title}
+                    className="w-full h-full object-cover"
+                  />
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                </div>
+
+                {/* Content Overlay */}
+                <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-end">
+                  {/* Tags */}
                   <motion.div
-                    className="bento-item h-full cursor-pointer group"
-                    onHoverStart={() => setHoveredProject(project.id)}
-                    onHoverEnd={() => setHoveredProject(null)}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: hoveredProject === project.id ? 1 : 0, y: hoveredProject === project.id ? 0 : 10 }}
+                    transition={{ duration: 0.3 }}
+                    className="flex gap-2 mb-3"
                   >
-                    {/* Image */}
-                    <div className="absolute inset-0 overflow-hidden rounded-2xl">
-                      <motion.img
-                        src={project.image}
-                        alt={project.title}
-                        className="w-full h-full object-cover"
-                        animate={{
-                          scale: hoveredProject === project.id ? 1.1 : 1,
-                        }}
-                        transition={{ duration: 0.6, ease: 'easeOut' }}
-                      />
-                      {/* Overlay */}
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"
-                        initial={{ opacity: 0.3 }}
-                        animate={{
-                          opacity: hoveredProject === project.id ? 0.95 : 0.3,
-                        }}
-                        transition={{ duration: 0.4 }}
-                      />
-                    </div>
-
-                    {/* Content */}
-                    <div className="relative z-10 h-full p-6 flex flex-col justify-end">
-                      <motion.div
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{
-                          y: hoveredProject === project.id ? 0 : 20,
-                          opacity: hoveredProject === project.id ? 1 : 0,
-                        }}
-                        transition={{ duration: 0.3 }}
-                        className="mb-3"
-                      >
-                        <span className="inline-block px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-medium">
-                          {project.category}
-                        </span>
-                      </motion.div>
-
-                      <h3 className="font-display font-bold text-xl md:text-2xl text-foreground mb-2">
-                        {project.title}
-                      </h3>
-
-                      <motion.p
-                        initial={{ y: 10, opacity: 0 }}
-                        animate={{
-                          y: hoveredProject === project.id ? 0 : 10,
-                          opacity: hoveredProject === project.id ? 1 : 0,
-                        }}
-                        transition={{ duration: 0.3, delay: 0.1 }}
-                        className="text-muted-foreground text-sm mb-4"
-                      >
-                        {project.description}
-                      </motion.p>
-
-                      <motion.div
-                        initial={{ y: 10, opacity: 0 }}
-                        animate={{
-                          y: hoveredProject === project.id ? 0 : 10,
-                          opacity: hoveredProject === project.id ? 1 : 0,
-                        }}
-                        transition={{ duration: 0.3, delay: 0.15 }}
-                        className="flex flex-wrap gap-2"
-                      >
-                        {project.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="px-2 py-1 rounded bg-secondary/80 text-xs text-muted-foreground"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </motion.div>
-
-                      {/* Arrow Icon */}
-                      <motion.div
-                        className="absolute top-6 right-6"
-                        initial={{ x: -10, y: 10, opacity: 0 }}
-                        animate={{
-                          x: hoveredProject === project.id ? 0 : -10,
-                          y: hoveredProject === project.id ? 0 : 10,
-                          opacity: hoveredProject === project.id ? 1 : 0,
-                        }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <div className="w-12 h-12 rounded-full bg-foreground flex items-center justify-center">
-                          <ArrowUpRight className="w-5 h-5 text-background" />
-                        </div>
-                      </motion.div>
-                    </div>
+                    {project.tags.map((tag, i) => (
+                      <span key={i} className="px-3 py-1 bg-background/80 backdrop-blur-sm text-xs text-muted-foreground">
+                        {tag}
+                      </span>
+                    ))}
                   </motion.div>
-                </TiltCard>
+
+                  {/* Title */}
+                  <motion.h3
+                    className="text-2xl md:text-3xl font-display font-bold mb-2"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: hoveredProject === project.id ? 1 : 0, y: hoveredProject === project.id ? 0 : 20 }}
+                    transition={{ duration: 0.3, delay: 0.1 }}
+                  >
+                    {project.title}
+                  </motion.h3>
+
+                  {/* View Button */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: hoveredProject === project.id ? 1 : 0, y: hoveredProject === project.id ? 0 : 20 }}
+                    transition={{ duration: 0.3, delay: 0.2 }}
+                    className="inline-flex items-center gap-2 text-accent mt-2"
+                  >
+                    <span className="text-sm font-body">View Project</span>
+                    <ArrowUpRight className="w-4 h-4" />
+                  </motion.div>
+                </div>
+
+                {/* Border Animation */}
+                <motion.div
+                  className="absolute inset-0 border-2 border-accent pointer-events-none"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: hoveredProject === project.id ? 1 : 0 }}
+                  transition={{ duration: 0.3 }}
+                />
+
+                {/* Corner Accent */}
+                <motion.div
+                  className="absolute top-0 right-0 w-16 h-16"
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: hoveredProject === project.id ? 1 : 0, scale: hoveredProject === project.id ? 1 : 0 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <div className="absolute top-0 right-0 w-full h-full bg-accent" />
+                  <ArrowUpRight className="absolute top-2 right-2 w-6 h-6 text-accent-foreground" />
+                </motion.div>
               </motion.div>
             ))}
           </AnimatePresence>
         </motion.div>
 
         {/* View All CTA */}
-        <FadeIn delay={0.4} className="text-center mt-16">
-          <motion.button
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-full border border-border bg-transparent hover:bg-secondary transition-all duration-300 font-display font-semibold"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            View All Projects
-            <ExternalLink className="w-4 h-4" />
-          </motion.button>
-        </FadeIn>
+        <RevealOnScroll delay={0.4}>
+          <div className="flex justify-center mt-16">
+            <motion.button
+              className="group relative px-12 py-5 border border-foreground font-display font-semibold tracking-wider overflow-hidden"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <span className="relative z-10 flex items-center gap-3 group-hover:text-background transition-colors duration-500">
+                VIEW ALL PROJECTS
+                <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+              </span>
+              <motion.div
+                className="absolute inset-0 bg-foreground"
+                initial={{ scaleX: 0 }}
+                whileHover={{ scaleX: 1 }}
+                transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                style={{ transformOrigin: 'left' }}
+              />
+            </motion.button>
+          </div>
+        </RevealOnScroll>
       </div>
     </section>
   );
