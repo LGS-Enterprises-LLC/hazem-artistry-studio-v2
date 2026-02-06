@@ -4,7 +4,7 @@ import { Search, Palette, Code2, Rocket, HeartHandshake, Check, MousePointer2 } 
 import ScrollReveal from '@/components/ScrollReveal';
 import MagneticElement from '@/components/MagneticElement';
 import { ArrowRight } from 'lucide-react';
-import FluidCanvas from '@/components/FluidCanvas';
+import FluidPaintCanvas from '@/components/FluidPaintCanvas';
 
 const steps = [
   {
@@ -98,7 +98,7 @@ const ProcessStep: React.FC<{ step: typeof steps[0]; index: number; isLast: bool
 
         {/* Content */}
         <motion.div 
-          className="flex-1 p-8 md:p-10 border border-border/50 bg-background/80 backdrop-blur-sm group-hover:border-accent/50 group-hover:bg-secondary/30 transition-all duration-500 relative z-10"
+          className="flex-1 p-8 md:p-10 border border-border/50 bg-background/90 backdrop-blur-sm group-hover:border-accent/50 group-hover:bg-secondary/30 transition-all duration-500 relative z-10"
           whileHover={{ x: 10 }}
         >
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
@@ -182,28 +182,26 @@ const Process: React.FC = () => {
       onMouseDown={() => setHasInteracted(true)}
       onTouchStart={() => setHasInteracted(true)}
     >
-      {/* Fluid Canvas Background - The star of the show! */}
-      <FluidCanvas 
-        className="z-0"
+      {/* Fluid Paint Canvas Background - Crimson/Red Theme */}
+      <FluidPaintCanvas 
+        className="z-0 pointer-events-auto"
         colors={['#ff0000', '#ff3333', '#cc0000', '#ff6666', '#990000', '#ff1a1a', '#b30000']}
-        intensity={0.6}
-        curl={35}
-        pressure={0.85}
-        densityDissipation={0.97}
-        velocityDissipation={0.98}
+        splatRadius={50}
+        fadeSpeed={0.012}
+        trailLength={20}
       />
       
       {/* Background overlays */}
-      <div className="absolute inset-0 grid-pattern opacity-10 z-[1]" />
+      <div className="absolute inset-0 grid-pattern opacity-10 z-[1] pointer-events-none" />
       <div className="absolute inset-0 noise pointer-events-none z-[2]" />
       
       {/* Gradient orb */}
       <motion.div
-        className="absolute bottom-0 right-0 w-[800px] h-[800px] bg-accent/5 rounded-full blur-[200px] z-[1]"
+        className="absolute bottom-0 right-0 w-[800px] h-[800px] bg-accent/5 rounded-full blur-[200px] z-[1] pointer-events-none"
         style={{ y }}
       />
       
-      <div className="container mx-auto px-4 md:px-6 relative z-10">
+      <div className="container mx-auto px-4 md:px-6 relative z-10 pointer-events-none">
         {/* Section Header */}
         <div className="text-center mb-16 md:mb-24">
           <ScrollReveal animation="fade-up">
@@ -230,7 +228,7 @@ const Process: React.FC = () => {
           {/* Interactive hint */}
           <ScrollReveal animation="fade-up" delay={0.3}>
             <motion.div 
-              className="mt-8 inline-flex items-center gap-2 px-4 py-2 bg-accent/10 border border-accent/30 text-accent text-sm font-body"
+              className="mt-8 inline-flex items-center gap-2 px-4 py-2 bg-accent/10 border border-accent/30 text-accent text-sm font-body pointer-events-auto"
               animate={hasInteracted ? { opacity: 0, y: -10 } : { opacity: [0.5, 1, 0.5] }}
               transition={hasInteracted ? { duration: 0.3 } : { duration: 2, repeat: Infinity }}
             >
@@ -241,7 +239,7 @@ const Process: React.FC = () => {
         </div>
 
         {/* Process Steps */}
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-5xl mx-auto pointer-events-auto">
           {steps.map((step, index) => (
             <ProcessStep 
               key={index} 
@@ -254,7 +252,7 @@ const Process: React.FC = () => {
 
         {/* CTA */}
         <ScrollReveal animation="fade-up" delay={0.6}>
-          <div className="text-center mt-16 md:mt-24 py-16 border-t border-border/30">
+          <div className="text-center mt-16 md:mt-24 py-16 border-t border-border/30 pointer-events-auto">
             <motion.p 
               className="text-2xl text-muted-foreground mb-8 font-body"
               animate={{ opacity: [0.7, 1, 0.7] }}
