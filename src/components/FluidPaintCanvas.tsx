@@ -1,66 +1,98 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 
-interface Splat {
+interface Particle {
   x: number;
   y: number;
-  dx: number;
-  dy: number;
+  vx: number;
+  vy: number;
   color: string;
-  radius: number;
+  size: number;
   life: number;
   maxLife: number;
+  rotation: number;
+  rotationSpeed: number;
 }
 
 interface FluidPaintCanvasProps {
   className?: string;
   colors?: string[];
-  maxSplats?: number;
+  maxParticles?: number;
   fadeSpeed?: number;
-  splatRadius?: number;
+  particleSize?: number;
   trailLength?: number;
+  glowIntensity?: number;
 }
 
 const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
   className = '',
   colors = ['#ff0000', '#ff3333', '#cc0000', '#ff6666', '#990000'],
-  maxSplats = 500,
-  fadeSpeed = 0.015,
-  splatRadius = 40,
-  trailLength = 15,
+  maxParticles = 800,
+  fadeSpeed = 0.008,
+  particleSize = 60,
+  trailLength = 20,
+  glowIntensity = 1.5,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const splatsRef = useRef<Splat[]>([]);
+  const particlesRef = useRef<Particle[]>([]);
   const isDrawingRef = useRef(false);
   const lastPosRef = useRef({ x: 0, y: 0 });
+  const velocityRef = useRef({ x: 0, y: 0 });
   const animationRef = useRef<number>();
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+  const timeRef = useRef(0);
 
   const getRandomColor = useCallback(() => {
     return colors[Math.floor(Math.random() * colors.length)];
   }, [colors]);
 
-  const createSplat = useCallback((x: number, y: number, dx: number, dy: number) => {
-    const speed = Math.sqrt(dx * dx + dy * dy);
-    const radius = Math.min(splatRadius, Math.max(15, splatRadius * (speed / 50)));
+  const hexToRgb = useCallback((hex: string) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : { r: 255, g: 0, b: 0 };
+  }, []);
+
+  const createParticle = useCallback((x: number, y: number, vx: number, vy: number, forceSize?: number) => {
+    const speed = Math.sqrt(vx * vx + vy * vy);
+    const baseSize = forceSize || Math.min(particleSize, Math.max(20, particleSize * (speed / 30)));
+    const sizeVariation = baseSize * (0.5 + Math.random() * 1);
     
-    const splat: Splat = {
-      x,
-      y,
-      dx: dx * 0.3,
-      dy: dy * 0.3,
+    const particle: Particle = {
+      x: x + (Math.random() - 0.5) * 30,
+      y: y + (Math.random() - 0.5) * 30,
+      vx: vx * (0.2 + Math.random() * 0.3) + (Math.random() - 0.5) * 3,
+      vy: vy * (0.2 + Math.random() * 0.3) + (Math.random() - 0.5) * 3,
       color: getRandomColor(),
-      radius,
+      size: sizeVariation,
       life: 1,
       maxLife: 1,
+      rotation: Math.random() * Math.PI * 2,
+      rotationSpeed: (Math.random() - 0.5) * 0.1,
     };
     
-    splatsRef.current.push(splat);
+    particlesRef.current.push(particle);
     
-    // Limit splats
-    if (splatsRef.current.length > maxSplats) {
-      splatsRef.current = splatsRef.current.slice(-maxSplats);
+    if (particlesRef.current.length > maxParticles) {
+      particlesRef.current = particlesRef.current.slice(-maxParticles);
     }
-  }, [getRandomColor, maxSplats, splatRadius]);
+  }, [getRandomColor, maxParticles, particleSize]);
+
+  const createBurst = useCallback((x: number, y: number, count: number = 12) => {
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
+      const speed = 8 + Math.random() * 15;
+      const size = particleSize * (0.6 + Math.random() * 0.8);
+      createParticle(
+        x + Math.cos(angle) * 10,
+        y + Math.sin(angle) * 10,
+        Math.cos(angle) * speed,
+        Math.sin(angle) * speed,
+        size
+      );
+    }
+  }, [createParticle, particleSize]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -81,52 +113,73 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Animation loop
     const animate = () => {
       if (!ctxRef.current) return;
       const ctx = ctxRef.current;
       const rect = canvas.getBoundingClientRect();
+      timeRef.current += 0.016;
       
-      // Clear with fade effect
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.03)';
+      // Subtle fade with color persistence
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.025)';
       ctx.fillRect(0, 0, rect.width, rect.height);
 
-      // Update and draw splats
-      splatsRef.current = splatsRef.current.filter(splat => {
-        splat.life -= fadeSpeed;
-        splat.x += splat.dx;
-        splat.y += splat.dy;
-        splat.dx *= 0.98;
-        splat.dy *= 0.98;
-        splat.radius *= 0.995;
+      // Update and draw particles with metaball-like blending
+      ctx.globalCompositeOperation = 'lighter';
+      
+      particlesRef.current = particlesRef.current.filter(particle => {
+        particle.life -= fadeSpeed;
         
-        if (splat.life <= 0 || splat.radius < 1) return false;
+        // Physics with organic movement
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.vx *= 0.985;
+        particle.vy *= 0.985;
+        particle.vy += 0.02; // Subtle gravity
+        particle.rotation += particle.rotationSpeed;
         
-        // Draw splat with glow
-        const alpha = splat.life * 0.8;
+        // Organic size pulsing
+        const pulse = Math.sin(timeRef.current * 3 + particle.rotation) * 0.1;
+        const currentSize = particle.size * (0.9 + pulse) * particle.life;
         
-        // Outer glow
-        const gradient = ctx.createRadialGradient(
-          splat.x, splat.y, 0,
-          splat.x, splat.y, splat.radius * 2
-        );
-        gradient.addColorStop(0, `${splat.color}${Math.floor(alpha * 180).toString(16).padStart(2, '0')}`);
-        gradient.addColorStop(0.4, `${splat.color}${Math.floor(alpha * 100).toString(16).padStart(2, '0')}`);
-        gradient.addColorStop(1, 'transparent');
+        if (particle.life <= 0 || currentSize < 1) return false;
         
+        const rgb = hexToRgb(particle.color);
+        const alpha = particle.life * 0.9;
+        
+        // Multi-layer glow effect
+        const layers = [
+          { scale: 3.5, alpha: alpha * 0.15 * glowIntensity },
+          { scale: 2.5, alpha: alpha * 0.25 * glowIntensity },
+          { scale: 1.8, alpha: alpha * 0.4 },
+          { scale: 1.2, alpha: alpha * 0.6 },
+          { scale: 0.8, alpha: alpha * 0.9 },
+        ];
+        
+        layers.forEach(layer => {
+          const gradient = ctx.createRadialGradient(
+            particle.x, particle.y, 0,
+            particle.x, particle.y, currentSize * layer.scale
+          );
+          gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${layer.alpha})`);
+          gradient.addColorStop(0.5, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${layer.alpha * 0.5})`);
+          gradient.addColorStop(1, 'transparent');
+          
+          ctx.beginPath();
+          ctx.arc(particle.x, particle.y, currentSize * layer.scale, 0, Math.PI * 2);
+          ctx.fillStyle = gradient;
+          ctx.fill();
+        });
+        
+        // Bright core
         ctx.beginPath();
-        ctx.arc(splat.x, splat.y, splat.radius * 2, 0, Math.PI * 2);
-        ctx.fillStyle = gradient;
-        ctx.fill();
-        
-        // Core
-        ctx.beginPath();
-        ctx.arc(splat.x, splat.y, splat.radius * 0.6, 0, Math.PI * 2);
-        ctx.fillStyle = `${splat.color}${Math.floor(alpha * 255).toString(16).padStart(2, '0')}`;
+        ctx.arc(particle.x, particle.y, currentSize * 0.3, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.5})`;
         ctx.fill();
         
         return true;
       });
+      
+      ctx.globalCompositeOperation = 'source-over';
 
       animationRef.current = requestAnimationFrame(animate);
     };
@@ -139,9 +192,8 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [fadeSpeed]);
+  }, [fadeSpeed, hexToRgb, glowIntensity]);
 
-  // Mouse/Touch handlers
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -158,37 +210,41 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
       isDrawingRef.current = true;
       const pos = 'touches' in e ? getPos(e.touches[0]) : getPos(e);
       lastPosRef.current = pos;
+      velocityRef.current = { x: 0, y: 0 };
       
-      // Initial splat burst
-      for (let i = 0; i < 5; i++) {
-        const angle = (Math.PI * 2 * i) / 5;
-        const speed = 5 + Math.random() * 10;
-        createSplat(
-          pos.x + Math.random() * 10 - 5,
-          pos.y + Math.random() * 10 - 5,
-          Math.cos(angle) * speed,
-          Math.sin(angle) * speed
-        );
-      }
+      // Initial burst on click
+      createBurst(pos.x, pos.y, 15);
     };
 
     const handleMove = (e: MouseEvent | TouchEvent) => {
-      if (!isDrawingRef.current) return;
-      
       const pos = 'touches' in e ? getPos(e.touches[0]) : getPos(e);
       const dx = pos.x - lastPosRef.current.x;
       const dy = pos.y - lastPosRef.current.y;
       const speed = Math.sqrt(dx * dx + dy * dy);
       
-      if (speed > 2) {
-        // Create multiple splats along the path
-        const steps = Math.min(Math.ceil(speed / 5), trailLength);
+      // Smooth velocity
+      velocityRef.current = {
+        x: velocityRef.current.x * 0.7 + dx * 0.3,
+        y: velocityRef.current.y * 0.7 + dy * 0.3,
+      };
+      
+      if (isDrawingRef.current && speed > 1) {
+        const steps = Math.min(Math.ceil(speed / 3), trailLength);
         for (let i = 0; i < steps; i++) {
           const t = i / steps;
-          const x = lastPosRef.current.x + dx * t + (Math.random() - 0.5) * 20;
-          const y = lastPosRef.current.y + dy * t + (Math.random() - 0.5) * 20;
+          const x = lastPosRef.current.x + dx * t;
+          const y = lastPosRef.current.y + dy * t;
           
-          createSplat(x, y, dx * 0.5, dy * 0.5);
+          // Create multiple particles per step for thick trails
+          const particleCount = Math.ceil(speed / 15) + 1;
+          for (let j = 0; j < particleCount; j++) {
+            createParticle(
+              x + (Math.random() - 0.5) * speed * 0.5,
+              y + (Math.random() - 0.5) * speed * 0.5,
+              velocityRef.current.x * (0.5 + Math.random() * 0.5),
+              velocityRef.current.y * (0.5 + Math.random() * 0.5)
+            );
+          }
         }
       }
       
@@ -196,6 +252,15 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     };
 
     const handleEnd = () => {
+      if (isDrawingRef.current) {
+        // Final burst on release
+        const speed = Math.sqrt(
+          velocityRef.current.x ** 2 + velocityRef.current.y ** 2
+        );
+        if (speed > 5) {
+          createBurst(lastPosRef.current.x, lastPosRef.current.y, Math.min(20, Math.ceil(speed)));
+        }
+      }
       isDrawingRef.current = false;
     };
 
@@ -216,7 +281,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
       canvas.removeEventListener('touchmove', handleMove);
       canvas.removeEventListener('touchend', handleEnd);
     };
-  }, [createSplat, trailLength]);
+  }, [createParticle, createBurst, trailLength]);
 
   return (
     <canvas

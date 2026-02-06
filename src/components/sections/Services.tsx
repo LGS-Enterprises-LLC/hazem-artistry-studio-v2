@@ -179,9 +179,10 @@ const Services: React.FC = () => {
       <FluidPaintCanvas 
         className="z-0 pointer-events-auto"
         colors={['#8b5cf6', '#a78bfa', '#7c3aed', '#c4b5fd', '#6d28d9', '#ddd6fe', '#5b21b6']}
-        splatRadius={45}
+        particleSize={45}
         fadeSpeed={0.015}
         trailLength={18}
+        glowIntensity={1.5}
       />
       
       {/* Background Pattern */}
