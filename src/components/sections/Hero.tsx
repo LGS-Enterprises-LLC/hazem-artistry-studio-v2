@@ -1,47 +1,41 @@
 import React, { useRef, useEffect } from 'react';
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
 import { ArrowDown, Play, Sparkles } from 'lucide-react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Hero3DPortrait from '@/components/Hero3DPortrait';
 import MagneticElement from '@/components/MagneticElement';
 import MorphingShape from '@/components/MorphingShape';
+import Counter from '@/components/Counter';
 
-gsap.registerPlugin(ScrollTrigger);
-
-const AnimatedLetter: React.FC<{ char: string; index: number; total: number }> = ({ char, index, total }) => {
+// Optimized split headline - words instead of letters to prevent broken rendering
+const SplitWord: React.FC<{ 
+  text: string; 
+  className?: string; 
+  delay?: number;
+  outline?: boolean;
+}> = ({ text, className = '', delay = 0, outline = false }) => {
+  const words = text.split(' ');
+  
   return (
-    <motion.span
-      className="inline-block"
-      initial={{ opacity: 0, y: 100, rotateX: 90 }}
-      animate={{ opacity: 1, y: 0, rotateX: 0 }}
-      transition={{
-        duration: 1,
-        delay: 0.5 + index * 0.04,
-        ease: [0.25, 0.1, 0.25, 1],
-      }}
-      whileHover={{
-        y: -10,
-        color: 'hsl(var(--accent))',
-        transition: { duration: 0.2 },
-      }}
-      style={{ transformOrigin: 'bottom' }}
-    >
-      {char === ' ' ? '\u00A0' : char}
-    </motion.span>
-  );
-};
-
-const SplitHeadline: React.FC<{ text: string; className?: string; delay?: number }> = ({ 
-  text, 
-  className = '',
-  delay = 0,
-}) => {
-  const chars = text.split('');
-  return (
-    <span className={`inline-flex flex-wrap ${className}`}>
-      {chars.map((char, i) => (
-        <AnimatedLetter key={i} char={char} index={i + delay * 10} total={chars.length} />
+    <span className={`inline-flex flex-wrap gap-x-[0.25em] ${className}`}>
+      {words.map((word, wordIndex) => (
+        <span key={wordIndex} className="overflow-hidden inline-block">
+          <motion.span
+            className={`inline-block ${outline ? 'text-stroke-thick' : ''}`}
+            initial={{ y: '110%', rotateX: -80 }}
+            animate={{ y: '0%', rotateX: 0 }}
+            transition={{
+              duration: 1.2,
+              delay: delay + wordIndex * 0.1,
+              ease: [0.25, 0.1, 0.25, 1],
+            }}
+            style={{ 
+              transformOrigin: 'bottom center',
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            {word}
+          </motion.span>
+        </span>
       ))}
     </span>
   );
@@ -49,7 +43,6 @@ const SplitHeadline: React.FC<{ text: string; className?: string; delay?: number
 
 const Hero: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const headlineRef = useRef<HTMLDivElement>(null);
   
   const mouseX = useMotionValue(0.5);
   const mouseY = useMotionValue(0.5);
@@ -135,7 +128,7 @@ const Hero: React.FC = () => {
       >
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center min-h-[80vh]">
           {/* Left Column - Typography */}
-          <div className="order-2 lg:order-1" ref={headlineRef}>
+          <div className="order-2 lg:order-1">
             {/* Top Badge */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -154,22 +147,22 @@ const Hero: React.FC = () => {
               </motion.span>
             </motion.div>
 
-            {/* Main Headline - Giant Typography */}
-            <div className="mb-8 md:mb-12 overflow-hidden">
+            {/* Main Headline - Word-based animation for stability */}
+            <div className="mb-8 md:mb-12">
               <h1 className="text-[clamp(2.5rem,10vw,9rem)] font-display font-black leading-[0.85] tracking-tighter">
-                <span className="block overflow-hidden">
-                  <SplitHeadline text="WE CREATE" />
+                <span className="block">
+                  <SplitWord text="WE CREATE" delay={0.3} />
                 </span>
-                <span className="block overflow-hidden text-stroke-thick">
-                  <SplitHeadline text="DIGITAL" delay={1} />
+                <span className="block">
+                  <SplitWord text="DIGITAL" delay={0.5} outline />
                 </span>
-                <span className="block overflow-hidden relative">
-                  <SplitHeadline text="EXPERIENCES" delay={2} />
+                <span className="block relative">
+                  <SplitWord text="EXPERIENCES" delay={0.7} />
                   <motion.span
                     className="absolute -bottom-2 left-0 h-2 md:h-3 bg-accent origin-left"
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
-                    transition={{ duration: 1.2, delay: 2, ease: [0.25, 0.1, 0.25, 1] }}
+                    transition={{ duration: 1.2, delay: 1.8, ease: [0.25, 0.1, 0.25, 1] }}
                     style={{ width: '100%' }}
                   />
                 </span>
@@ -180,7 +173,7 @@ const Hero: React.FC = () => {
             <motion.p
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1.8 }}
+              transition={{ duration: 0.8, delay: 1.4 }}
               className="max-w-lg text-base md:text-xl text-muted-foreground leading-relaxed font-body mb-8 md:mb-12"
             >
               World-class web design agency crafting high-converting websites and sales funnels 
@@ -199,7 +192,7 @@ const Hero: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 2 }}
+              transition={{ duration: 0.8, delay: 1.6 }}
               className="flex flex-wrap gap-4"
             >
               <MagneticElement
@@ -252,27 +245,28 @@ const Hero: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 2.2 }}
+              transition={{ duration: 0.8, delay: 1.8 }}
               className="flex gap-8 md:gap-12 mt-12 md:mt-16 pt-8 border-t border-border/30"
             >
               {[
-                { value: '50+', label: 'Projects' },
-                { value: '$10M+', label: 'Revenue' },
-                { value: '100%', label: 'Satisfaction' },
+                { value: 50, suffix: '+', label: 'Projects' },
+                { prefix: '$', value: 10, suffix: 'M+', label: 'Revenue' },
+                { value: 100, suffix: '%', label: 'Satisfaction' },
               ].map((stat, i) => (
                 <motion.div 
                   key={i}
                   whileHover={{ y: -5 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <motion.span 
-                    className="text-2xl md:text-4xl font-display font-bold text-accent block"
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 2.4 + i * 0.1, type: 'spring' }}
-                  >
-                    {stat.value}
-                  </motion.span>
+                  <span className="text-2xl md:text-4xl font-display font-bold text-accent block tabular-nums">
+                    <Counter
+                      value={stat.value}
+                      prefix={stat.prefix}
+                      suffix={stat.suffix}
+                      delay={2 + i * 0.2}
+                      duration={2}
+                    />
+                  </span>
                   <span className="block text-[10px] md:text-xs text-muted-foreground mt-1 tracking-wider uppercase">
                     {stat.label}
                   </span>
@@ -325,7 +319,7 @@ const Hero: React.FC = () => {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 3 }}
+        transition={{ delay: 2.5 }}
         className="absolute bottom-20 md:bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-30"
       >
         <span className="text-[8px] md:text-[10px] tracking-[0.3em] uppercase text-muted-foreground">
