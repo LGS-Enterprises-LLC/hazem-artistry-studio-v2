@@ -66,11 +66,11 @@ const Contact: React.FC = () => {
       <FluidPaintCanvas 
         className="z-0 pointer-events-auto"
         colors={['#06b6d4', '#22d3ee', '#0891b2', '#67e8f9', '#0e7490', '#a5f3fc', '#155e75']}
-        particleSize={45}
-        fadeSpeed={0.015}
-        trailLength={12}
-        glowIntensity={1.3}
-        maxParticles={300}
+        particleSize={55}
+        fadeSpeed={0.01}
+        trailLength={22}
+        glowIntensity={1.7}
+        maxParticles={600}
       />
       
       {/* Background elements */}
