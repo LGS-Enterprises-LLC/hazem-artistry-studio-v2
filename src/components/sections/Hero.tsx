@@ -1,10 +1,11 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
 import { ArrowDown, Play, Sparkles } from 'lucide-react';
 import Hero3DPortrait from '@/components/Hero3DPortrait';
 import MagneticElement from '@/components/MagneticElement';
 import MorphingShape from '@/components/MorphingShape';
 import Counter from '@/components/Counter';
+import FluidPaintCanvas from '@/components/FluidPaintCanvas';
 
 // Optimized split headline - words instead of letters to prevent broken rendering
 const SplitWord: React.FC<{ 
@@ -43,6 +44,7 @@ const SplitWord: React.FC<{
 
 const Hero: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [hasInteracted, setHasInteracted] = useState(false);
   
   const mouseX = useMotionValue(0.5);
   const mouseY = useMotionValue(0.5);
@@ -80,8 +82,23 @@ const Hero: React.FC = () => {
       ref={containerRef}
       className="relative min-h-screen flex flex-col justify-center overflow-hidden"
     >
+      {/* Fluid Paint Canvas - Gold/Amber Theme for Hero */}
+      <div 
+        className="absolute inset-0 z-0"
+        onMouseDown={() => setHasInteracted(true)}
+        onTouchStart={() => setHasInteracted(true)}
+      >
+        <FluidPaintCanvas 
+          colors={['#FFD700', '#FFA500', '#FF8C00', '#FFAA33', '#FFB347', '#E6BE8A']}
+          maxSplats={600}
+          fadeSpeed={0.012}
+          splatRadius={50}
+          trailLength={18}
+        />
+      </div>
+
       {/* Animated Background Elements */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 pointer-events-none">
         {/* Grid Pattern */}
         <div className="absolute inset-0 grid-pattern opacity-40" />
         
@@ -113,6 +130,32 @@ const Hero: React.FC = () => {
           transition={{ duration: 2, delay: 0.8 }}
         />
       </div>
+
+      {/* Interactive Hint */}
+      {!hasInteracted && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ delay: 3, duration: 0.5 }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-5 pointer-events-none"
+        >
+          <motion.div
+            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="flex flex-col items-center gap-3 text-foreground/40"
+          >
+            <div className="w-8 h-8 border-2 border-current rounded-full flex items-center justify-center">
+              <motion.div 
+                className="w-2 h-2 bg-current rounded-full"
+                animate={{ scale: [1, 0.5, 1] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              />
+            </div>
+            <span className="text-[10px] tracking-[0.3em] uppercase">Click & Drag to Paint</span>
+          </motion.div>
+        </motion.div>
+      )}
 
       {/* Noise Overlay */}
       <div className="absolute inset-0 noise pointer-events-none" />
