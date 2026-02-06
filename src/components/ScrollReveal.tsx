@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, forwardRef } from 'react';
 import { motion, useInView, useAnimation, Variants } from 'framer-motion';
 
 type AnimationType = 
@@ -30,47 +30,47 @@ const getVariants = (animation: AnimationType): Variants => {
   switch (animation) {
     case 'fade-up':
       return {
-        hidden: { opacity: 0, y: 80 },
+        hidden: { opacity: 0, y: 60 },
         visible: { opacity: 1, y: 0 },
       };
     case 'fade-down':
       return {
-        hidden: { opacity: 0, y: -80 },
+        hidden: { opacity: 0, y: -60 },
         visible: { opacity: 1, y: 0 },
       };
     case 'fade-left':
       return {
-        hidden: { opacity: 0, x: -80 },
+        hidden: { opacity: 0, x: -60 },
         visible: { opacity: 1, x: 0 },
       };
     case 'fade-right':
       return {
-        hidden: { opacity: 0, x: 80 },
+        hidden: { opacity: 0, x: 60 },
         visible: { opacity: 1, x: 0 },
       };
     case 'zoom-in':
       return {
-        hidden: { opacity: 0, scale: 0.8 },
+        hidden: { opacity: 0, scale: 0.9 },
         visible: { opacity: 1, scale: 1 },
       };
     case 'zoom-out':
       return {
-        hidden: { opacity: 0, scale: 1.2 },
+        hidden: { opacity: 0, scale: 1.1 },
         visible: { opacity: 1, scale: 1 },
       };
     case 'flip-up':
       return {
-        hidden: { opacity: 0, rotateX: 90, transformPerspective: 1000 },
-        visible: { opacity: 1, rotateX: 0, transformPerspective: 1000 },
+        hidden: { opacity: 0, rotateX: 45 },
+        visible: { opacity: 1, rotateX: 0 },
       };
     case 'flip-left':
       return {
-        hidden: { opacity: 0, rotateY: -90, transformPerspective: 1000 },
-        visible: { opacity: 1, rotateY: 0, transformPerspective: 1000 },
+        hidden: { opacity: 0, rotateY: -45 },
+        visible: { opacity: 1, rotateY: 0 },
       };
     case 'blur-in':
       return {
-        hidden: { opacity: 0, filter: 'blur(20px)' },
+        hidden: { opacity: 0, filter: 'blur(10px)' },
         visible: { opacity: 1, filter: 'blur(0px)' },
       };
     case 'slide-up':
@@ -85,31 +85,33 @@ const getVariants = (animation: AnimationType): Variants => {
       };
     case 'stagger-fade':
       return {
-        hidden: { opacity: 0, y: 30 },
+        hidden: { opacity: 0, y: 20 },
         visible: { opacity: 1, y: 0 },
       };
     default:
       return {
-        hidden: { opacity: 0, y: 80 },
+        hidden: { opacity: 0, y: 60 },
         visible: { opacity: 1, y: 0 },
       };
   }
 };
 
-const ScrollReveal: React.FC<ScrollRevealProps> = ({
+const ScrollReveal = forwardRef<HTMLDivElement, ScrollRevealProps>(({
   children,
   className = '',
   animation = 'fade-up',
   delay = 0,
-  duration = 0.8,
+  duration = 0.6,
   once = true,
   threshold = 0.2,
   staggerChildren = 0,
-}) => {
-  const ref = useRef<HTMLDivElement>(null);
+}, forwardedRef) => {
+  const internalRef = useRef<HTMLDivElement>(null);
+  const ref = (forwardedRef as React.RefObject<HTMLDivElement>) || internalRef;
+  
   const isInView = useInView(ref, { 
     once, 
-    margin: `-100px 0px 0px 0px`,
+    margin: `-50px 0px 0px 0px`,
   });
   const controls = useAnimation();
 
@@ -145,6 +147,8 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
       {children}
     </motion.div>
   );
-};
+});
+
+ScrollReveal.displayName = 'ScrollReveal';
 
 export default ScrollReveal;

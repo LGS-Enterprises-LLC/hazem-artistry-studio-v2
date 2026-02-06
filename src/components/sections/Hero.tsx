@@ -90,11 +90,11 @@ const Hero: React.FC = () => {
       >
         <FluidPaintCanvas 
           colors={['#FFD700', '#FFA500', '#FF8C00', '#FFAA33', '#FFB347', '#E6BE8A']}
-          maxParticles={600}
-          fadeSpeed={0.012}
-          particleSize={50}
-          trailLength={18}
-          glowIntensity={1.8}
+          maxParticles={300}
+          fadeSpeed={0.015}
+          particleSize={45}
+          trailLength={12}
+          glowIntensity={1.4}
         />
       </div>
 
@@ -329,34 +329,32 @@ const Hero: React.FC = () => {
           >
             <Hero3DPortrait className="w-full h-full max-w-[500px] mx-auto lg:max-w-none" />
             
-            {/* Floating Elements around portrait */}
-            <motion.div
-              className="absolute -top-8 -right-8 w-24 h-24 border-2 border-accent/50"
-              animate={{ rotate: [0, 90, 0] }}
-              transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+            {/* Floating Elements around portrait - simplified */}
+            <div
+              className="absolute -top-8 -right-8 w-24 h-24 border-2 border-accent/50 animate-spin"
+              style={{ animationDuration: '30s' }}
             />
-            <motion.div
+            <div
               className="absolute -bottom-4 -left-4 w-16 h-16 bg-accent/20 backdrop-blur-sm"
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 4, repeat: Infinity }}
             />
           </motion.div>
         </div>
       </motion.div>
 
-      {/* Bottom Marquee */}
+      {/* Bottom Marquee - CSS animation for performance */}
       <div className="absolute bottom-0 left-0 right-0 border-t border-border/50 py-4 md:py-6 bg-background/80 backdrop-blur-sm z-20 overflow-hidden">
-        <motion.div
-          className="flex whitespace-nowrap"
-          animate={{ x: [0, -2000] }}
-          transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+        <div
+          className="flex whitespace-nowrap animate-marquee"
+          style={{ 
+            animation: 'marquee 30s linear infinite',
+          }}
         >
           {[...Array(4)].map((_, i) => (
             <span key={i} className="text-xl md:text-3xl lg:text-4xl font-display font-bold text-foreground/10 mx-8">
               WEB DESIGN • SALES FUNNELS • 3D EXPERIENCES • BRANDING • UI/UX • CONVERSION OPTIMIZATION •
             </span>
           ))}
-        </motion.div>
+        </div>
       </div>
 
       {/* Scroll Indicator */}

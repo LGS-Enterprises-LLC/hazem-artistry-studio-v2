@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 
 interface Particle {
   x: number;
@@ -26,11 +26,11 @@ interface FluidPaintCanvasProps {
 const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
   className = '',
   colors = ['#ff0000', '#ff3333', '#cc0000', '#ff6666', '#990000'],
-  maxParticles = 800,
-  fadeSpeed = 0.008,
-  particleSize = 60,
-  trailLength = 20,
-  glowIntensity = 1.5,
+  maxParticles = 400,
+  fadeSpeed = 0.012,
+  particleSize = 50,
+  trailLength = 15,
+  glowIntensity = 1.2,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
@@ -40,6 +40,8 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
   const animationRef = useRef<number>();
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const timeRef = useRef(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const getRandomColor = useCallback(() => {
     return colors[Math.floor(Math.random() * colors.length)];
@@ -56,20 +58,20 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
 
   const createParticle = useCallback((x: number, y: number, vx: number, vy: number, forceSize?: number) => {
     const speed = Math.sqrt(vx * vx + vy * vy);
-    const baseSize = forceSize || Math.min(particleSize, Math.max(20, particleSize * (speed / 30)));
-    const sizeVariation = baseSize * (0.5 + Math.random() * 1);
+    const baseSize = forceSize || Math.min(particleSize, Math.max(15, particleSize * (speed / 30)));
+    const sizeVariation = baseSize * (0.5 + Math.random() * 0.8);
     
     const particle: Particle = {
-      x: x + (Math.random() - 0.5) * 30,
-      y: y + (Math.random() - 0.5) * 30,
-      vx: vx * (0.2 + Math.random() * 0.3) + (Math.random() - 0.5) * 3,
-      vy: vy * (0.2 + Math.random() * 0.3) + (Math.random() - 0.5) * 3,
+      x: x + (Math.random() - 0.5) * 20,
+      y: y + (Math.random() - 0.5) * 20,
+      vx: vx * (0.15 + Math.random() * 0.2) + (Math.random() - 0.5) * 2,
+      vy: vy * (0.15 + Math.random() * 0.2) + (Math.random() - 0.5) * 2,
       color: getRandomColor(),
       size: sizeVariation,
       life: 1,
       maxLife: 1,
       rotation: Math.random() * Math.PI * 2,
-      rotationSpeed: (Math.random() - 0.5) * 0.1,
+      rotationSpeed: (Math.random() - 0.5) * 0.05,
     };
     
     particlesRef.current.push(particle);
@@ -79,20 +81,36 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     }
   }, [getRandomColor, maxParticles, particleSize]);
 
-  const createBurst = useCallback((x: number, y: number, count: number = 12) => {
+  const createBurst = useCallback((x: number, y: number, count: number = 8) => {
     for (let i = 0; i < count; i++) {
-      const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
-      const speed = 8 + Math.random() * 15;
-      const size = particleSize * (0.6 + Math.random() * 0.8);
+      const angle = (Math.PI * 2 * i) / count + Math.random() * 0.3;
+      const speed = 5 + Math.random() * 10;
+      const size = particleSize * (0.5 + Math.random() * 0.6);
       createParticle(
-        x + Math.cos(angle) * 10,
-        y + Math.sin(angle) * 10,
+        x + Math.cos(angle) * 8,
+        y + Math.sin(angle) * 8,
         Math.cos(angle) * speed,
         Math.sin(angle) * speed,
         size
       );
     }
   }, [createParticle, particleSize]);
+
+  // Intersection Observer for visibility
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -103,7 +121,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     ctxRef.current = ctx;
 
     const resizeCanvas = () => {
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap DPR for performance
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
@@ -113,45 +131,63 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
+    return () => {
+      window.removeEventListener('resize', resizeCanvas);
+    };
+  }, []);
+
+  // Separate animation effect that respects visibility
+  useEffect(() => {
+    if (!isVisible || !ctxRef.current) {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = undefined;
+      }
+      return;
+    }
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
     const animate = () => {
-      if (!ctxRef.current) return;
+      if (!ctxRef.current || !isVisible) return;
       const ctx = ctxRef.current;
       const rect = canvas.getBoundingClientRect();
       timeRef.current += 0.016;
       
-      // Subtle fade with color persistence
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.025)';
+      // Fade with color persistence
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.035)';
       ctx.fillRect(0, 0, rect.width, rect.height);
 
-      // Update and draw particles with metaball-like blending
+      // Skip rendering if no particles
+      if (particlesRef.current.length === 0) {
+        animationRef.current = requestAnimationFrame(animate);
+        return;
+      }
+
       ctx.globalCompositeOperation = 'lighter';
       
       particlesRef.current = particlesRef.current.filter(particle => {
         particle.life -= fadeSpeed;
         
-        // Physics with organic movement
         particle.x += particle.vx;
         particle.y += particle.vy;
-        particle.vx *= 0.985;
-        particle.vy *= 0.985;
-        particle.vy += 0.02; // Subtle gravity
+        particle.vx *= 0.99;
+        particle.vy *= 0.99;
+        particle.vy += 0.015;
         particle.rotation += particle.rotationSpeed;
         
-        // Organic size pulsing
-        const pulse = Math.sin(timeRef.current * 3 + particle.rotation) * 0.1;
-        const currentSize = particle.size * (0.9 + pulse) * particle.life;
+        const currentSize = particle.size * particle.life;
         
         if (particle.life <= 0 || currentSize < 1) return false;
         
         const rgb = hexToRgb(particle.color);
-        const alpha = particle.life * 0.9;
+        const alpha = particle.life * 0.85;
         
-        // Multi-layer glow effect
+        // Simplified glow - fewer layers for performance
         const layers = [
-          { scale: 3.5, alpha: alpha * 0.15 * glowIntensity },
-          { scale: 2.5, alpha: alpha * 0.25 * glowIntensity },
-          { scale: 1.8, alpha: alpha * 0.4 },
-          { scale: 1.2, alpha: alpha * 0.6 },
+          { scale: 2.5, alpha: alpha * 0.2 * glowIntensity },
+          { scale: 1.5, alpha: alpha * 0.5 },
           { scale: 0.8, alpha: alpha * 0.9 },
         ];
         
@@ -161,7 +197,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
             particle.x, particle.y, currentSize * layer.scale
           );
           gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${layer.alpha})`);
-          gradient.addColorStop(0.5, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${layer.alpha * 0.5})`);
+          gradient.addColorStop(0.6, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${layer.alpha * 0.3})`);
           gradient.addColorStop(1, 'transparent');
           
           ctx.beginPath();
@@ -169,12 +205,6 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
           ctx.fillStyle = gradient;
           ctx.fill();
         });
-        
-        // Bright core
-        ctx.beginPath();
-        ctx.arc(particle.x, particle.y, currentSize * 0.3, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.5})`;
-        ctx.fill();
         
         return true;
       });
@@ -187,12 +217,11 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     animate();
 
     return () => {
-      window.removeEventListener('resize', resizeCanvas);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [fadeSpeed, hexToRgb, glowIntensity]);
+  }, [isVisible, fadeSpeed, hexToRgb, glowIntensity]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -212,8 +241,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
       lastPosRef.current = pos;
       velocityRef.current = { x: 0, y: 0 };
       
-      // Initial burst on click
-      createBurst(pos.x, pos.y, 15);
+      createBurst(pos.x, pos.y, 10);
     };
 
     const handleMove = (e: MouseEvent | TouchEvent) => {
@@ -222,27 +250,26 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
       const dy = pos.y - lastPosRef.current.y;
       const speed = Math.sqrt(dx * dx + dy * dy);
       
-      // Smooth velocity
       velocityRef.current = {
         x: velocityRef.current.x * 0.7 + dx * 0.3,
         y: velocityRef.current.y * 0.7 + dy * 0.3,
       };
       
-      if (isDrawingRef.current && speed > 1) {
-        const steps = Math.min(Math.ceil(speed / 3), trailLength);
+      if (isDrawingRef.current && speed > 2) {
+        const steps = Math.min(Math.ceil(speed / 5), trailLength);
         for (let i = 0; i < steps; i++) {
           const t = i / steps;
           const x = lastPosRef.current.x + dx * t;
           const y = lastPosRef.current.y + dy * t;
           
-          // Create multiple particles per step for thick trails
-          const particleCount = Math.ceil(speed / 15) + 1;
+          // Fewer particles per step for performance
+          const particleCount = Math.min(Math.ceil(speed / 20) + 1, 3);
           for (let j = 0; j < particleCount; j++) {
             createParticle(
-              x + (Math.random() - 0.5) * speed * 0.5,
-              y + (Math.random() - 0.5) * speed * 0.5,
-              velocityRef.current.x * (0.5 + Math.random() * 0.5),
-              velocityRef.current.y * (0.5 + Math.random() * 0.5)
+              x + (Math.random() - 0.5) * speed * 0.4,
+              y + (Math.random() - 0.5) * speed * 0.4,
+              velocityRef.current.x * (0.4 + Math.random() * 0.4),
+              velocityRef.current.y * (0.4 + Math.random() * 0.4)
             );
           }
         }
@@ -253,12 +280,11 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
 
     const handleEnd = () => {
       if (isDrawingRef.current) {
-        // Final burst on release
         const speed = Math.sqrt(
           velocityRef.current.x ** 2 + velocityRef.current.y ** 2
         );
         if (speed > 5) {
-          createBurst(lastPosRef.current.x, lastPosRef.current.y, Math.min(20, Math.ceil(speed)));
+          createBurst(lastPosRef.current.x, lastPosRef.current.y, Math.min(12, Math.ceil(speed * 0.8)));
         }
       }
       isDrawingRef.current = false;
@@ -284,14 +310,16 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
   }, [createParticle, createBurst, trailLength]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className={`absolute inset-0 w-full h-full ${className}`}
-      style={{ 
-        touchAction: 'none',
-        background: 'transparent',
-      }}
-    />
+    <div ref={containerRef} className={`absolute inset-0 ${className}`}>
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full"
+        style={{ 
+          touchAction: 'none',
+          background: 'transparent',
+        }}
+      />
+    </div>
   );
 };
 
