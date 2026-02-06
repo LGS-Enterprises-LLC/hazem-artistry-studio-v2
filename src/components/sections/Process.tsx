@@ -1,9 +1,10 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import { Search, Palette, Code2, Rocket, HeartHandshake, Check } from 'lucide-react';
+import { Search, Palette, Code2, Rocket, HeartHandshake, Check, MousePointer2 } from 'lucide-react';
 import ScrollReveal from '@/components/ScrollReveal';
 import MagneticElement from '@/components/MagneticElement';
 import { ArrowRight } from 'lucide-react';
+import FluidCanvas from '@/components/FluidCanvas';
 
 const steps = [
   {
@@ -97,7 +98,7 @@ const ProcessStep: React.FC<{ step: typeof steps[0]; index: number; isLast: bool
 
         {/* Content */}
         <motion.div 
-          className="flex-1 p-8 md:p-10 border border-border/50 bg-background/50 backdrop-blur-sm group-hover:border-accent/50 group-hover:bg-secondary/30 transition-all duration-500"
+          className="flex-1 p-8 md:p-10 border border-border/50 bg-background/80 backdrop-blur-sm group-hover:border-accent/50 group-hover:bg-secondary/30 transition-all duration-500 relative z-10"
           whileHover={{ x: 10 }}
         >
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
@@ -164,6 +165,7 @@ const ProcessStep: React.FC<{ step: typeof steps[0]; index: number; isLast: bool
 
 const Process: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [hasInteracted, setHasInteracted] = useState(false);
   
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -173,13 +175,31 @@ const Process: React.FC = () => {
   const y = useTransform(scrollYProgress, [0, 1], [50, -50]);
 
   return (
-    <section ref={containerRef} id="process" className="relative py-32 md:py-48 overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 grid-pattern opacity-20" />
-      <div className="absolute inset-0 noise pointer-events-none" />
+    <section 
+      ref={containerRef} 
+      id="process" 
+      className="relative py-32 md:py-48 overflow-hidden"
+      onMouseDown={() => setHasInteracted(true)}
+      onTouchStart={() => setHasInteracted(true)}
+    >
+      {/* Fluid Canvas Background - The star of the show! */}
+      <FluidCanvas 
+        className="z-0"
+        colors={['#ff0000', '#ff3333', '#cc0000', '#ff6666', '#990000', '#ff1a1a', '#b30000']}
+        intensity={0.6}
+        curl={35}
+        pressure={0.85}
+        densityDissipation={0.97}
+        velocityDissipation={0.98}
+      />
       
+      {/* Background overlays */}
+      <div className="absolute inset-0 grid-pattern opacity-10 z-[1]" />
+      <div className="absolute inset-0 noise pointer-events-none z-[2]" />
+      
+      {/* Gradient orb */}
       <motion.div
-        className="absolute bottom-0 right-0 w-[800px] h-[800px] bg-accent/5 rounded-full blur-[200px]"
+        className="absolute bottom-0 right-0 w-[800px] h-[800px] bg-accent/5 rounded-full blur-[200px] z-[1]"
         style={{ y }}
       />
       
@@ -205,6 +225,18 @@ const Process: React.FC = () => {
               A proven methodology refined over years of working with ambitious brands.
               Every project follows this battle-tested process.
             </p>
+          </ScrollReveal>
+
+          {/* Interactive hint */}
+          <ScrollReveal animation="fade-up" delay={0.3}>
+            <motion.div 
+              className="mt-8 inline-flex items-center gap-2 px-4 py-2 bg-accent/10 border border-accent/30 text-accent text-sm font-body"
+              animate={hasInteracted ? { opacity: 0, y: -10 } : { opacity: [0.5, 1, 0.5] }}
+              transition={hasInteracted ? { duration: 0.3 } : { duration: 2, repeat: Infinity }}
+            >
+              <MousePointer2 className="w-4 h-4" />
+              <span>Click and drag to paint</span>
+            </motion.div>
           </ScrollReveal>
         </div>
 
