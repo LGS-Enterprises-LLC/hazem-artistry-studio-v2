@@ -186,10 +186,11 @@ const Process: React.FC = () => {
       <FluidPaintCanvas 
         className="z-0 pointer-events-auto"
         colors={['#ff0000', '#ff3333', '#cc0000', '#ff6666', '#990000', '#ff1a1a', '#b30000']}
-        particleSize={50}
-        fadeSpeed={0.012}
-        trailLength={20}
-        glowIntensity={1.6}
+        particleSize={45}
+        fadeSpeed={0.015}
+        trailLength={12}
+        glowIntensity={1.3}
+        maxParticles={300}
       />
       
       {/* Background overlays */}
