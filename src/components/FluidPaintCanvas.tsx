@@ -5,15 +5,13 @@ interface Particle {
   y: number;
   vx: number;
   vy: number;
-  r: number;
-  g: number;
-  b: number;
   size: number;
   life: number;
   maxLife: number;
   angle: number;
   stretch: number;
   opacity: number;
+  spriteIndex: number;
 }
 
 interface FluidPaintCanvasProps {
@@ -62,42 +60,106 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
   const ambientTimerRef = useRef<number>();
   const canvasSizeRef = useRef({ width: 0, height: 0 });
 
+  // Cache for pre-rendered sprites
+  const spritesRef = useRef<HTMLCanvasElement[]>([]);
+  const SPRITE_SIZE = particleSize * 5; // Enough space for glow (2.5x radius)
+
   // Pre-compute RGB values
   useEffect(() => {
     rgbColorsRef.current = colors.map(hexToRgb);
   }, [colors]);
 
-  const getRandomColorRgb = useCallback(() => {
-    const rgbColors = rgbColorsRef.current;
-    return rgbColors[Math.floor(Math.random() * rgbColors.length)] || { r: 255, g: 0, b: 0 };
-  }, []);
-
   const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-  const getBlendedColor = useCallback(() => {
-    const rgbColors = rgbColorsRef.current;
-    if (rgbColors.length < 2) return rgbColors[0] || { r: 255, g: 0, b: 0 };
+  // Generate Sprites (Base + Mixed)
+  useEffect(() => {
+    const sprites: HTMLCanvasElement[] = [];
+    const baseRgbs = colors.map(hexToRgb);
+    const mixCount = 40; // Generate 40 random blends for variety
 
-    const idx1 = Math.floor(Math.random() * rgbColors.length);
-    const idx2 = Math.floor(Math.random() * rgbColors.length);
-    const t = Math.random();
+    const allRgbs = [...baseRgbs];
 
-    return {
-      r: Math.round(lerp(rgbColors[idx1].r, rgbColors[idx2].r, t)),
-      g: Math.round(lerp(rgbColors[idx1].g, rgbColors[idx2].g, t)),
-      b: Math.round(lerp(rgbColors[idx1].b, rgbColors[idx2].b, t)),
-    };
-  }, []);
+    for (let i = 0; i < mixCount; i++) {
+      if (baseRgbs.length < 2) break;
+      const idx1 = Math.floor(Math.random() * baseRgbs.length);
+      const idx2 = Math.floor(Math.random() * baseRgbs.length);
+      const t = Math.random();
+      allRgbs.push({
+        r: Math.round(lerp(baseRgbs[idx1].r, baseRgbs[idx2].r, t)),
+        g: Math.round(lerp(baseRgbs[idx1].g, baseRgbs[idx2].g, t)),
+        b: Math.round(lerp(baseRgbs[idx1].b, baseRgbs[idx2].b, t)),
+      });
+    }
+
+    allRgbs.forEach(({ r, g, b }) => {
+      const sprite = document.createElement('canvas');
+      sprite.width = SPRITE_SIZE;
+      sprite.height = SPRITE_SIZE;
+      const ctx = sprite.getContext('2d');
+      if (!ctx) return;
+
+      const center = SPRITE_SIZE / 2;
+      // Use a fixed reference size for drawing the sprite, we scale it later
+      const refSize = SPRITE_SIZE / 5; // Equivalent to 'currentSize' in original logic if stretch=1
+
+      // 1. Outer Glow
+      const glowSize = refSize * 2.5;
+      const gradient1 = ctx.createRadialGradient(center, center, 0, center, center, glowSize);
+      // Bake in relative alphas. Global alpha will scale this.
+      gradient1.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${0.15 * glowIntensity})`);
+      gradient1.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${0.06 * glowIntensity})`);
+      gradient1.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+      ctx.beginPath();
+      ctx.arc(center, center, glowSize, 0, Math.PI * 2);
+      ctx.fillStyle = gradient1;
+      ctx.fill();
+
+      // 2. Body (Standard aspect ratio, we stretch via transform later)
+      const bodyW = refSize;
+      const bodyH = refSize * 0.7;
+      const gradient2 = ctx.createRadialGradient(0, 0, 0, 0, 0, bodyW); // Fix: relative to transform, wait no, gradient is absolute coord system usually unless transformed
+      // Actually for sprite generation, simpler to just use radial gradient centered at center
+      const gradient2Fixed = ctx.createRadialGradient(center, center, 0, center, center, Math.max(bodyW, bodyH));
+      gradient2Fixed.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.7)`);
+      gradient2Fixed.addColorStop(0.4, `rgba(${r}, ${g}, ${b}, 0.4)`);
+      gradient2Fixed.addColorStop(0.7, `rgba(${r}, ${g}, ${b}, 0.15)`);
+      gradient2Fixed.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+      ctx.beginPath();
+      ctx.ellipse(center, center, bodyW, bodyH, 0, 0, Math.PI * 2);
+      ctx.fillStyle = gradient2Fixed;
+      ctx.fill();
+
+      // 3. Core
+      const coreSize = refSize * 0.25;
+      const coreW = coreSize * 0.6;
+      const coreH = coreSize;
+      const coreR = Math.min(255, r + 60);
+      const coreG = Math.min(255, g + 60);
+      const coreB = Math.min(255, b + 60);
+
+      ctx.beginPath();
+      ctx.ellipse(center, center, coreW, coreH, 0, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${coreR}, ${coreG}, ${coreB}, 0.5)`;
+      ctx.fill();
+
+      sprites.push(sprite);
+    });
+
+    spritesRef.current = sprites;
+  }, [colors, glowIntensity, SPRITE_SIZE]);
+
 
   const createParticle = useCallback((x: number, y: number, vx: number, vy: number, forceSize?: number): void => {
     const speed = Math.sqrt(vx * vx + vy * vy);
     const baseSize = forceSize || Math.min(particleSize, Math.max(15, particleSize * (speed / 25)));
     const sizeVariation = baseSize * (0.6 + Math.random() * 0.8);
-    const rgb = Math.random() > 0.3 ? getBlendedColor() : getRandomColorRgb();
 
-    // Calculate angle from velocity for brush stroke direction
+    // Select a random pre-rendered sprite
+    const spriteIndex = Math.floor(Math.random() * spritesRef.current.length);
+
     const angle = Math.atan2(vy, vx);
-    // More stretch = more brush-like; based on speed
     const stretch = Math.min(3.5, 1.2 + speed * 0.08);
 
     const particle: Particle = {
@@ -105,15 +167,13 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
       y: y + (Math.random() - 0.5) * 20,
       vx: vx * (0.15 + Math.random() * 0.25) + (Math.random() - 0.5) * 2,
       vy: vy * (0.15 + Math.random() * 0.25) + (Math.random() - 0.5) * 2,
-      r: rgb.r,
-      g: rgb.g,
-      b: rgb.b,
       size: sizeVariation,
       life: 1,
       maxLife: 1,
       angle: angle + (Math.random() - 0.5) * 0.4,
       stretch,
       opacity: 0.4 + Math.random() * 0.4,
+      spriteIndex,
     };
 
     particlesRef.current.push(particle);
@@ -121,7 +181,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     if (particlesRef.current.length > maxParticles) {
       particlesRef.current.splice(0, particlesRef.current.length - maxParticles);
     }
-  }, [getBlendedColor, getRandomColorRgb, maxParticles, particleSize]);
+  }, [maxParticles, particleSize]);
 
   const createBrushSplat = useCallback((x: number, y: number, count: number = 18, spread: number = 40) => {
     for (let i = 0; i < count; i++) {
@@ -167,19 +227,16 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
       const { width, height } = canvasSizeRef.current;
       if (width === 0 || height === 0) return;
 
-      // Random position with some padding from edges
       const padding = 80;
       const x = padding + Math.random() * (width - padding * 2);
       const y = padding + Math.random() * (height - padding * 2);
 
-      // Smaller, gentler splats for ambient effect
       const count = 6 + Math.floor(Math.random() * 10);
       const spread = 20 + Math.random() * 40;
 
       createBrushSplat(x, y, count, spread);
     };
 
-    // Initial delay before first splat
     const initialDelay = setTimeout(() => {
       doAmbientSplat();
       ambientTimerRef.current = window.setInterval(doAmbientSplat, ambientInterval + Math.random() * 2000);
@@ -217,6 +274,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     ctxRef.current = ctx;
 
     const resizeCanvas = () => {
+      // Use devicePixelRatio but capped at 2 for performance
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width * dpr;
@@ -240,7 +298,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     };
   }, []);
 
-  // Animation loop with brush-stroke rendering
+  // Animation loop with Sprite Rendering
   useEffect(() => {
     if (!isVisible) {
       if (animationRef.current) {
@@ -264,7 +322,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
 
       const { width, height } = canvasSizeRef.current;
 
-      // Soft fade for trails
+      // Clear/Fade
       ctx.fillStyle = 'rgba(0, 0, 0, 0.02)';
       ctx.fillRect(0, 0, width, height);
 
@@ -281,23 +339,20 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
         const p = particles[i];
         p.life -= fadeSpeed;
 
-        // Soft physics
+        // Physics
         p.x += p.vx;
         p.y += p.vy;
         p.vx *= 0.97;
         p.vy *= 0.97;
-        p.vy += 0.01; // minimal gravity
+        p.vy += 0.01;
 
-        // Gradually reduce stretch as particle slows
         p.stretch = Math.max(1.0, p.stretch * 0.995);
-        // Update angle to follow velocity
         const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
         if (speed > 0.5) {
           p.angle = Math.atan2(p.vy, p.vx);
         }
 
         const lifeFactor = p.life / p.maxLife;
-        // Smooth ease-out for size
         const sizeCurve = Math.sin(lifeFactor * Math.PI);
         const currentSize = p.size * sizeCurve;
 
@@ -305,55 +360,25 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
 
         particles[writeIndex++] = p;
 
+        const sprite = spritesRef.current[p.spriteIndex];
+        if (!sprite) continue;
+
         const alpha = lifeFactor * p.opacity;
-        const { r, g, b } = p;
+        ctx.globalAlpha = alpha;
 
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(p.angle);
+        ctx.scale(p.stretch, 1);
 
-        // Outer soft glow - wide, very transparent
-        const glowSize = currentSize * 2.5;
-        const gradient1 = ctx.createRadialGradient(0, 0, 0, 0, 0, glowSize);
-        gradient1.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha * 0.15 * glowIntensity})`);
-        gradient1.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${alpha * 0.06 * glowIntensity})`);
-        gradient1.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-        ctx.beginPath();
-        ctx.ellipse(0, 0, glowSize * p.stretch, glowSize, 0, 0, Math.PI * 2);
-        ctx.fillStyle = gradient1;
-        ctx.fill();
-
-        // Main brush body - stretched ellipse
-        const bodyW = currentSize * p.stretch;
-        const bodyH = currentSize * 0.7;
-        const gradient2 = ctx.createRadialGradient(0, 0, 0, 0, 0, Math.max(bodyW, bodyH));
-        gradient2.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha * 0.7})`);
-        gradient2.addColorStop(0.4, `rgba(${r}, ${g}, ${b}, ${alpha * 0.4})`);
-        gradient2.addColorStop(0.7, `rgba(${r}, ${g}, ${b}, ${alpha * 0.15})`);
-        gradient2.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-        ctx.beginPath();
-        ctx.ellipse(0, 0, bodyW, bodyH, 0, 0, Math.PI * 2);
-        ctx.fillStyle = gradient2;
-        ctx.fill();
-
-        // Hot core - small bright center
-        const coreSize = currentSize * 0.25;
-        ctx.beginPath();
-        ctx.ellipse(0, 0, coreSize * p.stretch * 0.6, coreSize, 0, 0, Math.PI * 2);
-        const coreAlpha = alpha * 0.5;
-        const coreR = Math.min(255, r + 60);
-        const coreG = Math.min(255, g + 60);
-        const coreB = Math.min(255, b + 60);
-        ctx.fillStyle = `rgba(${coreR}, ${coreG}, ${coreB}, ${coreAlpha})`;
-        ctx.fill();
+        const drawSize = currentSize * 5;
+        ctx.drawImage(sprite, -drawSize / 2, -drawSize / 2, drawSize, drawSize);
 
         ctx.restore();
       }
 
       particles.length = writeIndex;
-
+      ctx.globalAlpha = 1.0;
       ctx.globalCompositeOperation = 'source-over';
       animationRef.current = requestAnimationFrame(animate);
     };
@@ -365,7 +390,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [isVisible, fadeSpeed, glowIntensity]);
+  }, [isVisible, fadeSpeed]);
 
   // Event handlers
   useEffect(() => {
@@ -406,10 +431,8 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
           const x = lastPosRef.current.x + dx * t;
           const y = lastPosRef.current.y + dy * t;
 
-          // More particles at higher speeds for denser strokes
           const particleCount = Math.ceil(speed / 12) + 2;
           for (let j = 0; j < particleCount; j++) {
-            // Perpendicular spread for brush width
             const perpAngle = Math.atan2(dy, dx) + Math.PI / 2;
             const spreadDist = (Math.random() - 0.5) * speed * 0.3;
             createParticle(
