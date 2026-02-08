@@ -5,14 +5,15 @@ interface Particle {
   y: number;
   vx: number;
   vy: number;
-  color: string;
   r: number;
   g: number;
   b: number;
   size: number;
   life: number;
-  rotation: number;
-  rotationSpeed: number;
+  maxLife: number;
+  angle: number;
+  stretch: number;
+  opacity: number;
 }
 
 interface FluidPaintCanvasProps {
@@ -23,9 +24,10 @@ interface FluidPaintCanvasProps {
   particleSize?: number;
   trailLength?: number;
   glowIntensity?: number;
+  ambientSplats?: boolean;
+  ambientInterval?: number;
 }
 
-// Pre-compute hex to RGB at color array level for performance
 const hexToRgb = (hex: string) => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result ? {
@@ -43,6 +45,8 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
   particleSize = 55,
   trailLength = 18,
   glowIntensity = 1.6,
+  ambientSplats = true,
+  ambientInterval = 3000,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
@@ -55,8 +59,10 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const lastFrameTimeRef = useRef(0);
   const rgbColorsRef = useRef<Array<{r: number, g: number, b: number}>>([]);
+  const ambientTimerRef = useRef<number>();
+  const canvasSizeRef = useRef({ width: 0, height: 0 });
 
-  // Pre-compute RGB values for all colors
+  // Pre-compute RGB values
   useEffect(() => {
     rgbColorsRef.current = colors.map(hexToRgb);
   }, [colors]);
@@ -66,25 +72,48 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     return rgbColors[Math.floor(Math.random() * rgbColors.length)] || { r: 255, g: 0, b: 0 };
   }, []);
 
-  const createParticle = useCallback((x: number, y: number, vx: number, vy: number, forceSize?: number) => {
+  const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+  const getBlendedColor = useCallback(() => {
+    const rgbColors = rgbColorsRef.current;
+    if (rgbColors.length < 2) return rgbColors[0] || { r: 255, g: 0, b: 0 };
+    
+    const idx1 = Math.floor(Math.random() * rgbColors.length);
+    const idx2 = Math.floor(Math.random() * rgbColors.length);
+    const t = Math.random();
+    
+    return {
+      r: Math.round(lerp(rgbColors[idx1].r, rgbColors[idx2].r, t)),
+      g: Math.round(lerp(rgbColors[idx1].g, rgbColors[idx2].g, t)),
+      b: Math.round(lerp(rgbColors[idx1].b, rgbColors[idx2].b, t)),
+    };
+  }, []);
+
+  const createParticle = useCallback((x: number, y: number, vx: number, vy: number, forceSize?: number): void => {
     const speed = Math.sqrt(vx * vx + vy * vy);
-    const baseSize = forceSize || Math.min(particleSize, Math.max(20, particleSize * (speed / 30)));
-    const sizeVariation = baseSize * (0.5 + Math.random() * 1);
-    const rgb = getRandomColorRgb();
+    const baseSize = forceSize || Math.min(particleSize, Math.max(15, particleSize * (speed / 25)));
+    const sizeVariation = baseSize * (0.6 + Math.random() * 0.8);
+    const rgb = Math.random() > 0.3 ? getBlendedColor() : getRandomColorRgb();
+    
+    // Calculate angle from velocity for brush stroke direction
+    const angle = Math.atan2(vy, vx);
+    // More stretch = more brush-like; based on speed
+    const stretch = Math.min(3.5, 1.2 + speed * 0.08);
     
     const particle: Particle = {
-      x: x + (Math.random() - 0.5) * 30,
-      y: y + (Math.random() - 0.5) * 30,
-      vx: vx * (0.2 + Math.random() * 0.3) + (Math.random() - 0.5) * 3,
-      vy: vy * (0.2 + Math.random() * 0.3) + (Math.random() - 0.5) * 3,
-      color: '',
+      x: x + (Math.random() - 0.5) * 20,
+      y: y + (Math.random() - 0.5) * 20,
+      vx: vx * (0.15 + Math.random() * 0.25) + (Math.random() - 0.5) * 2,
+      vy: vy * (0.15 + Math.random() * 0.25) + (Math.random() - 0.5) * 2,
       r: rgb.r,
       g: rgb.g,
       b: rgb.b,
       size: sizeVariation,
       life: 1,
-      rotation: Math.random() * Math.PI * 2,
-      rotationSpeed: (Math.random() - 0.5) * 0.1,
+      maxLife: 1,
+      angle: angle + (Math.random() - 0.5) * 0.4,
+      stretch,
+      opacity: 0.4 + Math.random() * 0.4,
     };
     
     particlesRef.current.push(particle);
@@ -92,16 +121,31 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     if (particlesRef.current.length > maxParticles) {
       particlesRef.current.splice(0, particlesRef.current.length - maxParticles);
     }
-  }, [getRandomColorRgb, maxParticles, particleSize]);
+  }, [getBlendedColor, getRandomColorRgb, maxParticles, particleSize]);
 
-  const createBurst = useCallback((x: number, y: number, count: number = 12) => {
+  const createBrushSplat = useCallback((x: number, y: number, count: number = 18, spread: number = 40) => {
     for (let i = 0; i < count; i++) {
-      const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
-      const speed = 8 + Math.random() * 15;
-      const size = particleSize * (0.6 + Math.random() * 0.8);
+      const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.8;
+      const dist = Math.random() * spread;
+      const speed = 2 + Math.random() * 6;
+      const size = particleSize * (0.4 + Math.random() * 1.0);
       createParticle(
-        x + Math.cos(angle) * 10,
-        y + Math.sin(angle) * 10,
+        x + Math.cos(angle) * dist,
+        y + Math.sin(angle) * dist,
+        Math.cos(angle) * speed,
+        Math.sin(angle) * speed,
+        size
+      );
+    }
+    // Add some smaller satellite droplets
+    for (let i = 0; i < count * 0.6; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const dist = spread * 0.5 + Math.random() * spread;
+      const speed = 1 + Math.random() * 3;
+      const size = particleSize * (0.15 + Math.random() * 0.35);
+      createParticle(
+        x + Math.cos(angle) * dist,
+        y + Math.sin(angle) * dist,
         Math.cos(angle) * speed,
         Math.sin(angle) * speed,
         size
@@ -109,15 +153,53 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     }
   }, [createParticle, particleSize]);
 
-  // Intersection Observer for visibility - pause when off-screen
+  // Ambient auto-splats
+  useEffect(() => {
+    if (!ambientSplats || !isVisible) {
+      if (ambientTimerRef.current) {
+        clearInterval(ambientTimerRef.current);
+        ambientTimerRef.current = undefined;
+      }
+      return;
+    }
+
+    const doAmbientSplat = () => {
+      const { width, height } = canvasSizeRef.current;
+      if (width === 0 || height === 0) return;
+      
+      // Random position with some padding from edges
+      const padding = 80;
+      const x = padding + Math.random() * (width - padding * 2);
+      const y = padding + Math.random() * (height - padding * 2);
+      
+      // Smaller, gentler splats for ambient effect
+      const count = 6 + Math.floor(Math.random() * 10);
+      const spread = 20 + Math.random() * 40;
+      
+      createBrushSplat(x, y, count, spread);
+    };
+
+    // Initial delay before first splat
+    const initialDelay = setTimeout(() => {
+      doAmbientSplat();
+      ambientTimerRef.current = window.setInterval(doAmbientSplat, ambientInterval + Math.random() * 2000);
+    }, 1000 + Math.random() * 2000);
+
+    return () => {
+      clearTimeout(initialDelay);
+      if (ambientTimerRef.current) {
+        clearInterval(ambientTimerRef.current);
+      }
+    };
+  }, [ambientSplats, ambientInterval, isVisible, createBrushSplat]);
+
+  // Intersection Observer
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsVisible(entry.isIntersecting);
-      },
+      ([entry]) => setIsVisible(entry.isIntersecting),
       { threshold: 0, rootMargin: '100px' }
     );
 
@@ -125,6 +207,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     return () => observer.disconnect();
   }, []);
 
+  // Canvas setup
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -139,6 +222,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
       ctx.scale(dpr, dpr);
+      canvasSizeRef.current = { width: rect.width, height: rect.height };
     };
 
     resizeCanvas();
@@ -156,7 +240,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     };
   }, []);
 
-  // Optimized animation loop
+  // Animation loop with brush-stroke rendering
   useEffect(() => {
     if (!isVisible) {
       if (animationRef.current) {
@@ -171,7 +255,6 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     if (!canvas || !ctx) return;
 
     const animate = (currentTime: number) => {
-      // Throttle to ~60fps
       const deltaTime = currentTime - lastFrameTimeRef.current;
       if (deltaTime < 16) {
         animationRef.current = requestAnimationFrame(animate);
@@ -179,12 +262,10 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
       }
       lastFrameTimeRef.current = currentTime;
 
-      const rect = canvas.getBoundingClientRect();
-      const width = rect.width;
-      const height = rect.height;
+      const { width, height } = canvasSizeRef.current;
       
-      // Fade effect
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.025)';
+      // Soft fade for trails
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.02)';
       ctx.fillRect(0, 0, width, height);
 
       const particles = particlesRef.current;
@@ -195,64 +276,82 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
 
       ctx.globalCompositeOperation = 'lighter';
       
-      // Batch process particles
       let writeIndex = 0;
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
         p.life -= fadeSpeed;
         
-        // Physics
+        // Soft physics
         p.x += p.vx;
         p.y += p.vy;
-        p.vx *= 0.98;
-        p.vy *= 0.98;
-        p.vy += 0.02;
-        p.rotation += p.rotationSpeed;
+        p.vx *= 0.97;
+        p.vy *= 0.97;
+        p.vy += 0.01; // minimal gravity
         
-        const currentSize = p.size * (0.9 + Math.sin(currentTime * 0.003 + p.rotation) * 0.1) * p.life;
+        // Gradually reduce stretch as particle slows
+        p.stretch = Math.max(1.0, p.stretch * 0.995);
+        // Update angle to follow velocity
+        const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+        if (speed > 0.5) {
+          p.angle = Math.atan2(p.vy, p.vx);
+        }
         
-        if (p.life <= 0 || currentSize < 1) continue;
+        const lifeFactor = p.life / p.maxLife;
+        // Smooth ease-out for size
+        const sizeCurve = Math.sin(lifeFactor * Math.PI);
+        const currentSize = p.size * sizeCurve;
         
-        // Keep particle
+        if (p.life <= 0 || currentSize < 0.5) continue;
+        
         particles[writeIndex++] = p;
         
-        const alpha = p.life * 0.85;
+        const alpha = lifeFactor * p.opacity;
         const { r, g, b } = p;
         
-        // Outer glow
-        const gradient1 = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, currentSize * 3);
-        gradient1.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha * 0.2 * glowIntensity})`);
-        gradient1.addColorStop(0.4, `rgba(${r}, ${g}, ${b}, ${alpha * 0.1 * glowIntensity})`);
-        gradient1.addColorStop(1, 'transparent');
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.angle);
+        
+        // Outer soft glow - wide, very transparent
+        const glowSize = currentSize * 2.5;
+        const gradient1 = ctx.createRadialGradient(0, 0, 0, 0, 0, glowSize);
+        gradient1.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha * 0.15 * glowIntensity})`);
+        gradient1.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${alpha * 0.06 * glowIntensity})`);
+        gradient1.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        
         ctx.beginPath();
-        ctx.arc(p.x, p.y, currentSize * 3, 0, Math.PI * 2);
+        ctx.ellipse(0, 0, glowSize * p.stretch, glowSize, 0, 0, Math.PI * 2);
         ctx.fillStyle = gradient1;
         ctx.fill();
         
-        // Mid glow
-        const gradient2 = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, currentSize * 1.8);
-        gradient2.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha * 0.5})`);
-        gradient2.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${alpha * 0.25})`);
-        gradient2.addColorStop(1, 'transparent');
+        // Main brush body - stretched ellipse
+        const bodyW = currentSize * p.stretch;
+        const bodyH = currentSize * 0.7;
+        const gradient2 = ctx.createRadialGradient(0, 0, 0, 0, 0, Math.max(bodyW, bodyH));
+        gradient2.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha * 0.7})`);
+        gradient2.addColorStop(0.4, `rgba(${r}, ${g}, ${b}, ${alpha * 0.4})`);
+        gradient2.addColorStop(0.7, `rgba(${r}, ${g}, ${b}, ${alpha * 0.15})`);
+        gradient2.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        
         ctx.beginPath();
-        ctx.arc(p.x, p.y, currentSize * 1.8, 0, Math.PI * 2);
+        ctx.ellipse(0, 0, bodyW, bodyH, 0, 0, Math.PI * 2);
         ctx.fillStyle = gradient2;
         ctx.fill();
         
-        // Core
+        // Hot core - small bright center
+        const coreSize = currentSize * 0.25;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, currentSize * 0.6, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha * 0.9})`;
+        ctx.ellipse(0, 0, coreSize * p.stretch * 0.6, coreSize, 0, 0, Math.PI * 2);
+        const coreAlpha = alpha * 0.5;
+        const coreR = Math.min(255, r + 60);
+        const coreG = Math.min(255, g + 60);
+        const coreB = Math.min(255, b + 60);
+        ctx.fillStyle = `rgba(${coreR}, ${coreG}, ${coreB}, ${coreAlpha})`;
         ctx.fill();
         
-        // Bright center
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, currentSize * 0.25, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.4})`;
-        ctx.fill();
+        ctx.restore();
       }
       
-      // Trim dead particles in place
       particles.length = writeIndex;
       
       ctx.globalCompositeOperation = 'source-over';
@@ -286,7 +385,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
       const pos = 'touches' in e ? getPos(e.touches[0]) : getPos(e);
       lastPosRef.current = pos;
       velocityRef.current = { x: 0, y: 0 };
-      createBurst(pos.x, pos.y, 15);
+      createBrushSplat(pos.x, pos.y, 20, 30);
     };
 
     const handleMove = (e: MouseEvent | TouchEvent) => {
@@ -301,19 +400,23 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
       };
       
       if (isDrawingRef.current && speed > 1) {
-        const steps = Math.min(Math.ceil(speed / 3), trailLength);
+        const steps = Math.min(Math.ceil(speed / 4), trailLength);
         for (let i = 0; i < steps; i++) {
           const t = i / steps;
           const x = lastPosRef.current.x + dx * t;
           const y = lastPosRef.current.y + dy * t;
           
-          const particleCount = Math.ceil(speed / 15) + 1;
+          // More particles at higher speeds for denser strokes
+          const particleCount = Math.ceil(speed / 12) + 2;
           for (let j = 0; j < particleCount; j++) {
+            // Perpendicular spread for brush width
+            const perpAngle = Math.atan2(dy, dx) + Math.PI / 2;
+            const spreadDist = (Math.random() - 0.5) * speed * 0.3;
             createParticle(
-              x + (Math.random() - 0.5) * speed * 0.5,
-              y + (Math.random() - 0.5) * speed * 0.5,
-              velocityRef.current.x * (0.5 + Math.random() * 0.5),
-              velocityRef.current.y * (0.5 + Math.random() * 0.5)
+              x + Math.cos(perpAngle) * spreadDist,
+              y + Math.sin(perpAngle) * spreadDist,
+              velocityRef.current.x * (0.4 + Math.random() * 0.4),
+              velocityRef.current.y * (0.4 + Math.random() * 0.4)
             );
           }
         }
@@ -325,14 +428,13 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     const handleEnd = () => {
       if (isDrawingRef.current) {
         const speed = Math.sqrt(velocityRef.current.x ** 2 + velocityRef.current.y ** 2);
-        if (speed > 5) {
-          createBurst(lastPosRef.current.x, lastPosRef.current.y, Math.min(20, Math.ceil(speed)));
+        if (speed > 4) {
+          createBrushSplat(lastPosRef.current.x, lastPosRef.current.y, Math.min(16, Math.ceil(speed * 0.8)), speed * 2);
         }
       }
       isDrawingRef.current = false;
     };
 
-    // Use passive listeners for better scroll performance
     canvas.addEventListener('mousedown', handleStart, { passive: true });
     canvas.addEventListener('mousemove', handleMove, { passive: true });
     canvas.addEventListener('mouseup', handleEnd, { passive: true });
@@ -350,7 +452,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
       canvas.removeEventListener('touchmove', handleMove);
       canvas.removeEventListener('touchend', handleEnd);
     };
-  }, [createParticle, createBurst, trailLength]);
+  }, [createParticle, createBrushSplat, trailLength]);
 
   return (
     <div 
