@@ -83,12 +83,12 @@ const ProcessStep: React.FC<{ step: typeof steps[0]; index: number; isLast: bool
               {step.number}
             </span>
           </motion.div>
-          
+
           {/* Pulsing ring */}
           <motion.div
             className="absolute inset-0 border-2 border-accent"
             initial={{ scale: 1, opacity: 0 }}
-            animate={isInView ? { 
+            animate={isInView ? {
               scale: [1, 2, 2],
               opacity: [0, 0.5, 0],
             } : {}}
@@ -97,7 +97,7 @@ const ProcessStep: React.FC<{ step: typeof steps[0]; index: number; isLast: bool
         </div>
 
         {/* Content */}
-        <motion.div 
+        <motion.div
           className="flex-1 p-8 md:p-10 border border-border/50 bg-background/90 backdrop-blur-sm group-hover:border-accent/50 group-hover:bg-secondary/30 transition-all duration-500 relative z-10"
           whileHover={{ x: 10 }}
         >
@@ -116,7 +116,7 @@ const ProcessStep: React.FC<{ step: typeof steps[0]; index: number; isLast: bool
                   <h3 className="text-2xl md:text-3xl font-display font-bold group-hover:text-accent transition-colors">
                     {step.title}
                   </h3>
-                  <motion.span 
+                  <motion.span
                     className="text-xs text-muted-foreground px-3 py-1 bg-secondary/50 inline-block mt-2"
                     whileHover={{ scale: 1.05 }}
                   >
@@ -165,8 +165,9 @@ const ProcessStep: React.FC<{ step: typeof steps[0]; index: number; isLast: bool
 
 const Process: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(containerRef, { margin: "100px 0px 0px 0px" });
   const [hasInteracted, setHasInteracted] = useState(false);
-  
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start end', 'end start'],
@@ -175,34 +176,36 @@ const Process: React.FC = () => {
   const y = useTransform(scrollYProgress, [0, 1], [50, -50]);
 
   return (
-    <section 
-      ref={containerRef} 
-      id="process" 
+    <section
+      ref={containerRef}
+      id="process"
       className="relative py-32 md:py-48 overflow-hidden"
       onMouseDown={() => setHasInteracted(true)}
       onTouchStart={() => setHasInteracted(true)}
     >
-      {/* Fluid Paint Canvas Background - Crimson/Red Theme */}
-      <FluidPaintCanvas 
-        className="z-0 pointer-events-auto"
-        colors={['#ff0000', '#ff3333', '#cc0000', '#ff6666', '#990000', '#ff1a1a', '#b30000']}
-        particleSize={55}
-        fadeSpeed={0.01}
-        trailLength={20}
-        glowIntensity={1.7}
-        maxParticles={600}
-      />
-      
-      {/* Background overlays */}
-      <div className="absolute inset-0 grid-pattern opacity-10 z-[1] pointer-events-none" />
-      <div className="absolute inset-0 noise pointer-events-none z-[2]" />
-      
-      {/* Gradient orb */}
-      <motion.div
-        className="absolute bottom-0 right-0 w-[800px] h-[800px] bg-accent/5 rounded-full blur-[200px] z-[1] pointer-events-none"
-        style={{ y }}
-      />
-      
+      {/* Background Elements - Unmount when out of view */}
+      {isInView && (
+        <>
+          <FluidPaintCanvas
+            className="z-0 pointer-events-auto"
+            colors={['#ff0000', '#ff3333', '#cc0000', '#ff6666', '#990000', '#ff1a1a', '#b30000']}
+            particleSize={55}
+            fadeSpeed={0.01}
+            trailLength={20}
+            glowIntensity={1.7}
+            maxParticles={600}
+          />
+
+          <div className="absolute inset-0 grid-pattern opacity-10 z-[1] pointer-events-none" />
+          <div className="absolute inset-0 noise pointer-events-none z-[2]" />
+
+          <motion.div
+            className="absolute bottom-0 right-0 w-[800px] h-[800px] bg-accent/5 rounded-full blur-[200px] z-[1] pointer-events-none"
+            style={{ y }}
+          />
+        </>
+      )}
+
       <div className="container mx-auto px-4 md:px-6 relative z-10 pointer-events-none">
         {/* Section Header */}
         <div className="text-center mb-16 md:mb-24">
@@ -213,13 +216,13 @@ const Process: React.FC = () => {
               <span className="w-12 h-px bg-accent" />
             </span>
           </ScrollReveal>
-          
+
           <ScrollReveal animation="fade-up" delay={0.1}>
             <h2 className="text-[clamp(3rem,10vw,8rem)] font-display font-black leading-[0.85] tracking-tighter">
               HOW I <span className="text-stroke-thick">WORK</span>
             </h2>
           </ScrollReveal>
-          
+
           <ScrollReveal animation="fade-up" delay={0.2}>
             <p className="max-w-2xl mx-auto mt-8 text-lg text-muted-foreground font-body">
               A proven methodology refined over years of working with ambitious brands.
@@ -229,7 +232,7 @@ const Process: React.FC = () => {
 
           {/* Interactive hint */}
           <ScrollReveal animation="fade-up" delay={0.3}>
-            <motion.div 
+            <motion.div
               className="mt-8 inline-flex items-center gap-2 px-4 py-2 bg-accent/10 border border-accent/30 text-accent text-sm font-body pointer-events-auto"
               animate={hasInteracted ? { opacity: 0, y: -10 } : { opacity: [0.5, 1, 0.5] }}
               transition={hasInteracted ? { duration: 0.3 } : { duration: 2, repeat: Infinity }}
@@ -243,9 +246,9 @@ const Process: React.FC = () => {
         {/* Process Steps */}
         <div className="max-w-5xl mx-auto pointer-events-auto">
           {steps.map((step, index) => (
-            <ProcessStep 
-              key={index} 
-              step={step} 
+            <ProcessStep
+              key={index}
+              step={step}
               index={index}
               isLast={index === steps.length - 1}
             />
@@ -255,7 +258,7 @@ const Process: React.FC = () => {
         {/* CTA */}
         <ScrollReveal animation="fade-up" delay={0.6}>
           <div className="text-center mt-16 md:mt-24 py-16 border-t border-border/30 pointer-events-auto">
-            <motion.p 
+            <motion.p
               className="text-2xl text-muted-foreground mb-8 font-body"
               animate={{ opacity: [0.7, 1, 0.7] }}
               transition={{ duration: 3, repeat: Infinity }}

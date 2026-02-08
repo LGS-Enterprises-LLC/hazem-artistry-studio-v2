@@ -73,21 +73,21 @@ const ServiceCard: React.FC<{ service: typeof services[0]; index: number }> = ({
         animate={{ opacity: isHovered ? 1 : 0, scale: isHovered ? 1 : 1.5 }}
         transition={{ duration: 0.5 }}
       />
-      
+
       {/* Glowing border on hover */}
       <motion.div
         className="absolute inset-0 border-2 border-[#8b5cf6] pointer-events-none"
         initial={{ opacity: 0 }}
         animate={{ opacity: isHovered ? 1 : 0 }}
       />
-      
+
       {/* Content */}
       <div className="relative p-8 md:p-10 h-full flex flex-col">
         {/* Number & Icon Row */}
         <div className="flex items-start justify-between mb-8">
           <motion.div
             className="w-16 h-16 flex items-center justify-center border border-border transition-all duration-500"
-            animate={{ 
+            animate={{
               borderColor: isHovered ? '#8b5cf6' : 'hsl(var(--border))',
               backgroundColor: isHovered ? 'rgba(139, 92, 246, 0.1)' : 'transparent',
             }}
@@ -95,7 +95,7 @@ const ServiceCard: React.FC<{ service: typeof services[0]; index: number }> = ({
           >
             <service.icon className="w-7 h-7 text-muted-foreground transition-colors duration-500 group-hover:text-[#8b5cf6]" />
           </motion.div>
-          <motion.span 
+          <motion.span
             className="text-[80px] font-display font-black text-foreground/[0.03] leading-none select-none -mt-4 -mr-2 transition-colors duration-500"
             animate={{ color: isHovered ? 'rgba(139, 92, 246, 0.1)' : 'hsl(var(--foreground) / 0.03)' }}
           >
@@ -104,7 +104,7 @@ const ServiceCard: React.FC<{ service: typeof services[0]; index: number }> = ({
         </div>
 
         {/* Title */}
-        <motion.h3 
+        <motion.h3
           className="text-xl md:text-2xl font-display font-bold mb-4 transition-colors duration-500"
           animate={{ color: isHovered ? '#8b5cf6' : 'hsl(var(--foreground))' }}
         >
@@ -158,8 +158,10 @@ const ServiceCard: React.FC<{ service: typeof services[0]; index: number }> = ({
 
 const Services: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  // Add inView check for background elements
+  const isInView = useInView(containerRef, { margin: "100px 0px 0px 0px" });
   const [hasInteracted, setHasInteracted] = useState(false);
-  
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start end', 'end start'],
@@ -168,39 +170,42 @@ const Services: React.FC = () => {
   const y = useTransform(scrollYProgress, [0, 1], [100, -100]);
 
   return (
-    <section 
-      ref={containerRef} 
-      id="services" 
+    <section
+      ref={containerRef}
+      id="services"
       className="relative py-32 md:py-48 bg-secondary overflow-hidden"
       onMouseDown={() => setHasInteracted(true)}
       onTouchStart={() => setHasInteracted(true)}
     >
-      {/* Fluid Paint Canvas - Purple/Violet Theme */}
-      <FluidPaintCanvas 
-        className="z-0 pointer-events-auto"
-        colors={['#8b5cf6', '#a78bfa', '#7c3aed', '#c4b5fd', '#6d28d9', '#ddd6fe', '#5b21b6']}
-        particleSize={50}
-        fadeSpeed={0.012}
-        trailLength={18}
-        glowIntensity={1.6}
-        maxParticles={600}
-      />
-      
-      {/* Background Pattern */}
-      <div className="absolute inset-0 grid-pattern opacity-20 pointer-events-none" />
-      <div className="absolute inset-0 noise pointer-events-none" />
-      
-      {/* Floating elements */}
-      <motion.div
-        className="absolute top-1/4 right-[10%] w-80 h-80 border border-[#8b5cf6]/10 rounded-full pointer-events-none"
-        style={{ y }}
-        animate={{ rotate: 360 }}
-        transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
-      />
-      <motion.div
-        className="absolute bottom-1/4 left-[5%] w-60 h-60 bg-[#8b5cf6]/5 rounded-full blur-[100px] pointer-events-none"
-      />
-      
+      {/* Background Elements - Unmount when out of view */}
+      {isInView && (
+        <>
+          <FluidPaintCanvas
+            className="z-0 pointer-events-auto"
+            colors={['#8b5cf6', '#a78bfa', '#7c3aed', '#c4b5fd', '#6d28d9', '#ddd6fe', '#5b21b6']}
+            particleSize={50}
+            fadeSpeed={0.012}
+            trailLength={18}
+            glowIntensity={1.6}
+            maxParticles={600}
+          />
+
+          <div className="absolute inset-0 grid-pattern opacity-20 pointer-events-none" />
+          <div className="absolute inset-0 noise pointer-events-none" />
+
+          {/* Floating elements */}
+          <motion.div
+            className="absolute top-1/4 right-[10%] w-80 h-80 border border-[#8b5cf6]/10 rounded-full pointer-events-none"
+            style={{ y }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
+          />
+          <motion.div
+            className="absolute bottom-1/4 left-[5%] w-60 h-60 bg-[#8b5cf6]/5 rounded-full blur-[100px] pointer-events-none"
+          />
+        </>
+      )}
+
       <div className="container mx-auto px-4 md:px-6 relative z-10 pointer-events-none">
         {/* Section Header */}
         <div className="text-center mb-16 md:mb-24">
@@ -211,23 +216,23 @@ const Services: React.FC = () => {
               <span className="w-12 h-px bg-[#8b5cf6]" />
             </span>
           </ScrollReveal>
-          
+
           <ScrollReveal animation="fade-up" delay={0.1}>
             <h2 className="text-[clamp(3rem,10vw,8rem)] font-display font-black leading-[0.85] tracking-tighter">
               WHAT I <span className="text-[#8b5cf6]">DO</span>
             </h2>
           </ScrollReveal>
-          
+
           <ScrollReveal animation="fade-up" delay={0.2}>
             <p className="max-w-2xl mx-auto mt-8 text-lg text-muted-foreground font-body">
-              Comprehensive digital solutions designed to elevate your brand 
+              Comprehensive digital solutions designed to elevate your brand
               and drive measurable results.
             </p>
           </ScrollReveal>
 
           {/* Interactive hint */}
           <ScrollReveal animation="fade-up" delay={0.3}>
-            <motion.div 
+            <motion.div
               className="mt-8 inline-flex items-center gap-2 px-4 py-2 bg-[#8b5cf6]/10 border border-[#8b5cf6]/30 text-[#8b5cf6] text-sm font-body pointer-events-auto"
               animate={hasInteracted ? { opacity: 0, y: -10 } : { opacity: [0.5, 1, 0.5] }}
               transition={hasInteracted ? { duration: 0.3 } : { duration: 2, repeat: Infinity }}

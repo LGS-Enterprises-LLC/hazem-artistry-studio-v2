@@ -8,10 +8,11 @@ import FluidPaintCanvas from '@/components/FluidPaintCanvas';
 
 const Contact: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(containerRef, { margin: "100px 0px 0px 0px" });
   const formRef = useRef<HTMLDivElement>(null);
   const isFormInView = useInView(formRef, { once: true, margin: '-100px' });
   const [hasInteracted, setHasInteracted] = useState(false);
-  
+
   const [formState, setFormState] = useState({
     name: '',
     email: '',
@@ -55,38 +56,40 @@ const Contact: React.FC = () => {
   ];
 
   return (
-    <section 
-      ref={containerRef} 
-      id="contact" 
+    <section
+      ref={containerRef}
+      id="contact"
       className="relative py-32 md:py-48 bg-secondary noise overflow-hidden"
       onMouseDown={() => setHasInteracted(true)}
       onTouchStart={() => setHasInteracted(true)}
     >
-      {/* Fluid Paint Canvas - Cyan/Teal Theme */}
-      <FluidPaintCanvas 
-        className="z-0 pointer-events-auto"
-        colors={['#06b6d4', '#22d3ee', '#0891b2', '#67e8f9', '#0e7490', '#a5f3fc', '#155e75']}
-        particleSize={55}
-        fadeSpeed={0.01}
-        trailLength={22}
-        glowIntensity={1.7}
-        maxParticles={600}
-      />
-      
-      {/* Background elements */}
-      <div className="absolute inset-0 grid-pattern opacity-20 pointer-events-none" />
-      <motion.div 
-        className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#06b6d4]/5 to-transparent pointer-events-none"
-        style={{ y }}
-      />
-      
-      {/* Decorative circle */}
-      <motion.div
-        className="absolute -bottom-[400px] -right-[400px] w-[800px] h-[800px] border border-[#06b6d4]/10 rounded-full pointer-events-none"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 120, repeat: Infinity, ease: 'linear' }}
-      />
-      
+      {/* Background Elements - Unmount when out of view */}
+      {isInView && (
+        <>
+          <FluidPaintCanvas
+            className="z-0 pointer-events-auto"
+            colors={['#06b6d4', '#22d3ee', '#0891b2', '#67e8f9', '#0e7490', '#a5f3fc', '#155e75']}
+            particleSize={55}
+            fadeSpeed={0.01}
+            trailLength={22}
+            glowIntensity={1.7}
+            maxParticles={600}
+          />
+
+          <div className="absolute inset-0 grid-pattern opacity-20 pointer-events-none" />
+          <motion.div
+            className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#06b6d4]/5 to-transparent pointer-events-none"
+            style={{ y }}
+          />
+
+          <motion.div
+            className="absolute -bottom-[400px] -right-[400px] w-[800px] h-[800px] border border-[#06b6d4]/10 rounded-full pointer-events-none"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 120, repeat: Infinity, ease: 'linear' }}
+          />
+        </>
+      )}
+
       <div className="container mx-auto px-4 md:px-6 relative z-10 pointer-events-none">
         {/* Header */}
         <div className="text-center mb-16 md:mb-24">
@@ -108,7 +111,7 @@ const Contact: React.FC = () => {
           </h2>
 
           {/* Interactive hint */}
-          <motion.div 
+          <motion.div
             className="mt-8 inline-flex items-center gap-2 px-4 py-2 bg-[#06b6d4]/10 border border-[#06b6d4]/30 text-[#06b6d4] text-sm font-body pointer-events-auto"
             animate={hasInteracted ? { opacity: 0, y: -10 } : { opacity: [0.5, 1, 0.5] }}
             transition={hasInteracted ? { duration: 0.3 } : { duration: 2, repeat: Infinity }}
@@ -123,7 +126,7 @@ const Contact: React.FC = () => {
           <div className="lg:col-span-2">
             <RevealOnScroll delay={0.2}>
               <p className="text-xl text-muted-foreground mb-12 font-body leading-relaxed">
-                Ready to take your digital presence to the next level? 
+                Ready to take your digital presence to the next level?
                 Let's discuss your project and create something extraordinary together.
               </p>
             </RevealOnScroll>
@@ -131,8 +134,8 @@ const Contact: React.FC = () => {
             {/* Contact Info */}
             <div className="space-y-6 mb-12">
               <RevealOnScroll delay={0.3}>
-                <motion.a 
-                  href="mailto:hello@hazemmagdy.com" 
+                <motion.a
+                  href="mailto:hello@hazemmagdy.com"
                   className="flex items-center gap-4 group p-4 -mx-4 hover:bg-background/50 transition-colors"
                   whileHover={{ x: 5 }}
                 >
@@ -149,7 +152,7 @@ const Contact: React.FC = () => {
               </RevealOnScroll>
 
               <RevealOnScroll delay={0.4}>
-                <motion.div 
+                <motion.div
                   className="flex items-center gap-4 p-4 -mx-4"
                   whileHover={{ x: 5 }}
                 >
@@ -166,7 +169,7 @@ const Contact: React.FC = () => {
               </RevealOnScroll>
 
               <RevealOnScroll delay={0.5}>
-                <motion.div 
+                <motion.div
                   className="flex items-center gap-4 p-4 -mx-4"
                   whileHover={{ x: 5 }}
                 >
@@ -209,7 +212,7 @@ const Contact: React.FC = () => {
 
           {/* Right Column - Form */}
           <div ref={formRef} className="lg:col-span-3">
-            <motion.div 
+            <motion.div
               className="bg-background/90 backdrop-blur-sm p-8 md:p-12 border border-border relative overflow-hidden"
               initial={{ opacity: 0, y: 60 }}
               animate={isFormInView ? { opacity: 1, y: 0 } : {}}
@@ -218,7 +221,7 @@ const Contact: React.FC = () => {
               {/* Corner accents */}
               <div className="absolute top-0 left-0 w-20 h-20 border-t-2 border-l-2 border-[#06b6d4]/30" />
               <div className="absolute bottom-0 right-0 w-20 h-20 border-b-2 border-r-2 border-[#06b6d4]/30" />
-              
+
               {isSubmitted ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -233,7 +236,7 @@ const Contact: React.FC = () => {
                   >
                     <CheckCircle2 className="w-12 h-12 text-white" />
                   </motion.div>
-                  <motion.h3 
+                  <motion.h3
                     className="text-3xl font-display font-bold mb-4"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -241,7 +244,7 @@ const Contact: React.FC = () => {
                   >
                     Message Sent!
                   </motion.h3>
-                  <motion.p 
+                  <motion.p
                     className="text-muted-foreground font-body text-lg"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -255,7 +258,7 @@ const Contact: React.FC = () => {
                   {/* Name & Email Row */}
                   <div className="grid md:grid-cols-2 gap-8">
                     {formFields.map((field, i) => (
-                      <motion.div 
+                      <motion.div
                         key={field.name}
                         initial={{ opacity: 0, y: 30 }}
                         animate={isFormInView ? { opacity: 1, y: 0 } : {}}
@@ -384,7 +387,7 @@ const Contact: React.FC = () => {
                           <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         </motion.div>
                       )}
-                      
+
                       {/* Hover effect */}
                       <motion.div
                         className="absolute inset-0 bg-[#0891b2]"

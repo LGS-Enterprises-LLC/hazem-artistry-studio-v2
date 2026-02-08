@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring, useInView } from 'framer-motion';
 import { ArrowUpRight, ExternalLink, ArrowRight, ArrowLeft, MousePointer2 } from 'lucide-react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -87,7 +87,7 @@ const HorizontalGallery: React.FC = () => {
   useEffect(() => {
     const container = containerRef.current;
     const scroller = scrollerRef.current;
-    
+
     if (!container || !scroller) return;
 
     const getScrollAmount = () => {
@@ -123,22 +123,22 @@ const HorizontalGallery: React.FC = () => {
 
   return (
     <div ref={containerRef} className="h-screen relative overflow-hidden">
-      <div 
-        ref={scrollerRef} 
+      <div
+        ref={scrollerRef}
         className="flex h-full items-center gap-8 px-[10vw] will-change-transform"
       >
         {projects.map((project, index) => (
           <HorizontalProjectCard key={project.id} project={project} index={index} />
         ))}
       </div>
-      
+
       {/* Progress Indicator */}
       <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-4 z-20">
         <span className="text-4xl font-display font-bold text-accent">
           {String(currentIndex + 1).padStart(2, '0')}
         </span>
         <div className="w-32 h-px bg-border relative overflow-hidden">
-          <motion.div 
+          <motion.div
             className="absolute inset-y-0 left-0 bg-accent"
             style={{ width: `${((currentIndex + 1) / projects.length) * 100}%` }}
           />
@@ -147,7 +147,7 @@ const HorizontalGallery: React.FC = () => {
           / {String(projects.length).padStart(2, '0')}
         </span>
       </div>
-      
+
       {/* Scroll hint */}
       <div className="absolute bottom-12 right-12 flex items-center gap-3 text-muted-foreground z-20">
         <motion.div
@@ -165,10 +165,10 @@ const HorizontalGallery: React.FC = () => {
 const HorizontalProjectCard: React.FC<{ project: Project; index: number }> = ({ project, index }) => {
   const [isHovered, setIsHovered] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
-  
+
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  
+
   const rotateX = useSpring(useTransform(y, [-100, 100], [10, -10]), { damping: 20, stiffness: 150 });
   const rotateY = useSpring(useTransform(x, [-100, 100], [-10, 10]), { damping: 20, stiffness: 150 });
 
@@ -211,7 +211,7 @@ const HorizontalProjectCard: React.FC<{ project: Project; index: number }> = ({ 
           animate={{ scale: isHovered ? 1.1 : 1 }}
           transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
         />
-        
+
         {/* Color overlay */}
         <motion.div
           className="absolute inset-0"
@@ -219,13 +219,13 @@ const HorizontalProjectCard: React.FC<{ project: Project; index: number }> = ({ 
           initial={{ opacity: 0 }}
           animate={{ opacity: isHovered ? 0.3 : 0 }}
         />
-        
+
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
       </div>
 
       {/* Content */}
-      <div 
+      <div
         className="absolute inset-0 p-8 md:p-12 flex flex-col justify-end"
         style={{ transform: 'translateZ(40px)' }}
       >
@@ -236,7 +236,7 @@ const HorizontalProjectCard: React.FC<{ project: Project; index: number }> = ({ 
         >
           {String(index + 1).padStart(2, '0')}
         </motion.span>
-        
+
         {/* Tags */}
         <motion.div
           className="flex flex-wrap gap-2 mb-6"
@@ -319,10 +319,10 @@ const ProjectGrid: React.FC<{ projects: Project[] }> = ({ projects }) => {
 const GridProjectCard: React.FC<{ project: Project; index: number }> = ({ project, index }) => {
   const [isHovered, setIsHovered] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
-  
+
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  
+
   const rotateX = useSpring(useTransform(y, [-100, 100], [5, -5]), { damping: 20, stiffness: 200 });
   const rotateY = useSpring(useTransform(x, [-100, 100], [-5, 5]), { damping: 20, stiffness: 200 });
 
@@ -414,6 +414,7 @@ const Portfolio: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('All');
   const [viewMode, setViewMode] = useState<'horizontal' | 'grid'>('horizontal');
   const containerRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(containerRef, { margin: "100px 0px 0px 0px" });
   const [hasInteracted, setHasInteracted] = useState(false);
 
   const { scrollYProgress } = useScroll({
@@ -426,27 +427,30 @@ const Portfolio: React.FC = () => {
     : projects.filter(p => p.category === activeCategory);
 
   return (
-    <section 
-      ref={containerRef} 
-      id="work" 
+    <section
+      ref={containerRef}
+      id="work"
       className="relative noise overflow-hidden"
       onMouseDown={() => setHasInteracted(true)}
       onTouchStart={() => setHasInteracted(true)}
     >
-      {/* Fluid Paint Canvas - Rose/Pink Theme */}
-      <FluidPaintCanvas 
-        className="z-0 pointer-events-auto"
-        colors={['#f43f5e', '#fb7185', '#e11d48', '#fda4af', '#be123c', '#fecdd3', '#9f1239']}
-        particleSize={55}
-        fadeSpeed={0.01}
-        trailLength={20}
-        glowIntensity={1.7}
-        maxParticles={600}
-      />
-      
-      {/* Background */}
-      <div className="absolute inset-0 grid-pattern opacity-20 pointer-events-none" />
-      
+      {/* Background Elements - Unmount when out of view */}
+      {isInView && (
+        <>
+          <FluidPaintCanvas
+            className="z-0 pointer-events-auto"
+            colors={['#f43f5e', '#fb7185', '#e11d48', '#fda4af', '#be123c', '#fecdd3', '#9f1239']}
+            particleSize={55}
+            fadeSpeed={0.01}
+            trailLength={20}
+            glowIntensity={1.7}
+            maxParticles={600}
+          />
+
+          <div className="absolute inset-0 grid-pattern opacity-20 pointer-events-none" />
+        </>
+      )}
+
       {/* Section Header - Always visible */}
       <div className="relative z-10 container mx-auto px-4 md:px-6 py-32 pointer-events-none">
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-16 pointer-events-auto">
@@ -474,33 +478,30 @@ const Portfolio: React.FC = () => {
               <div className="flex gap-2 justify-end">
                 <button
                   onClick={() => setViewMode('horizontal')}
-                  className={`px-4 py-2 text-xs font-display tracking-wider border transition-all ${
-                    viewMode === 'horizontal' ? 'bg-accent text-accent-foreground border-accent' : 'border-border text-muted-foreground hover:border-foreground'
-                  }`}
+                  className={`px-4 py-2 text-xs font-display tracking-wider border transition-all ${viewMode === 'horizontal' ? 'bg-accent text-accent-foreground border-accent' : 'border-border text-muted-foreground hover:border-foreground'
+                    }`}
                 >
                   GALLERY
                 </button>
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`px-4 py-2 text-xs font-display tracking-wider border transition-all ${
-                    viewMode === 'grid' ? 'bg-accent text-accent-foreground border-accent' : 'border-border text-muted-foreground hover:border-foreground'
-                  }`}
+                  className={`px-4 py-2 text-xs font-display tracking-wider border transition-all ${viewMode === 'grid' ? 'bg-accent text-accent-foreground border-accent' : 'border-border text-muted-foreground hover:border-foreground'
+                    }`}
                 >
                   GRID
                 </button>
               </div>
-              
+
               {/* Category Filters */}
               <div className="flex flex-wrap gap-2">
                 {categories.map((category) => (
                   <motion.button
                     key={category}
                     onClick={() => setActiveCategory(category)}
-                    className={`relative px-5 py-2 text-sm font-body transition-all overflow-hidden ${
-                      activeCategory === category
+                    className={`relative px-5 py-2 text-sm font-body transition-all overflow-hidden ${activeCategory === category
                         ? 'text-accent-foreground'
                         : 'text-muted-foreground hover:text-foreground'
-                    }`}
+                      }`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -511,9 +512,8 @@ const Portfolio: React.FC = () => {
                       transition={{ duration: 0.3 }}
                       style={{ transformOrigin: 'left' }}
                     />
-                    <div className={`absolute inset-0 border ${
-                      activeCategory === category ? 'border-accent' : 'border-border'
-                    }`} />
+                    <div className={`absolute inset-0 border ${activeCategory === category ? 'border-accent' : 'border-border'
+                      }`} />
                     <span className="relative z-10">{category}</span>
                   </motion.button>
                 ))}
