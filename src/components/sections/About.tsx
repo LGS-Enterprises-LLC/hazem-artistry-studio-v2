@@ -1,15 +1,17 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import ScrollReveal from '@/components/ScrollReveal';
 import Counter from '@/components/Counter';
 import MagneticElement from '@/components/MagneticElement';
 import hazemHero from '@/assets/hazem-hero.png';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, MousePointer2 } from 'lucide-react';
+import FluidPaintCanvas from '@/components/FluidPaintCanvas';
 
 const About: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(imageRef, { once: true, margin: '-100px' });
+  const [hasInteracted, setHasInteracted] = useState(false);
   
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -44,9 +46,22 @@ const About: React.FC = () => {
       ref={containerRef}
       id="about" 
       className="relative py-32 md:py-48 overflow-hidden"
+      onMouseDown={() => setHasInteracted(true)}
+      onTouchStart={() => setHasInteracted(true)}
     >
+      {/* Fluid Paint Canvas - Emerald/Green Theme */}
+      <FluidPaintCanvas 
+        className="z-0 pointer-events-auto"
+        colors={['#10b981', '#34d399', '#059669', '#6ee7b7', '#047857', '#a7f3d0', '#065f46']}
+        particleSize={55}
+        fadeSpeed={0.01}
+        trailLength={20}
+        glowIntensity={1.7}
+        maxParticles={600}
+      />
+      
       {/* Background Elements */}
-      <div className="absolute inset-0 grid-pattern opacity-20" />
+      <div className="absolute inset-0 grid-pattern opacity-20 pointer-events-none" />
       <div className="absolute inset-0 noise pointer-events-none" />
       
       {/* Floating accent shapes */}
@@ -65,7 +80,7 @@ const About: React.FC = () => {
         transition={{ duration: 8, repeat: Infinity }}
       />
       
-      <div className="container mx-auto px-4 md:px-6 relative z-10">
+      <div className="container mx-auto px-4 md:px-6 relative z-10 pointer-events-none">
         {/* Section Header */}
         <div className="mb-16 md:mb-24">
           <ScrollReveal animation="fade-up">
@@ -84,7 +99,7 @@ const About: React.FC = () => {
         {/* Main Content Grid */}
         <div className="grid lg:grid-cols-12 gap-8 lg:gap-20">
           {/* Left Column - Image */}
-          <div ref={imageRef} className="lg:col-span-5 relative">
+          <div ref={imageRef} className="lg:col-span-5 relative pointer-events-auto">
             <motion.div 
               className="relative aspect-[3/4] lg:sticky lg:top-32"
               style={{ y: imageY, scale: imageScale, rotate }}
@@ -157,7 +172,7 @@ const About: React.FC = () => {
           </div>
 
           {/* Right Column - Text */}
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-7 pointer-events-auto">
             <motion.div style={{ y: textY }}>
               {/* Headline */}
               <ScrollReveal animation="fade-up" delay={0.2}>

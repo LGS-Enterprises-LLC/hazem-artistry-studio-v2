@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Quote, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Quote, Star, MousePointer2 } from 'lucide-react';
 import ScrollReveal from '@/components/ScrollReveal';
+import FluidPaintCanvas from '@/components/FluidPaintCanvas';
 
 const testimonials = [
   {
@@ -51,6 +52,7 @@ const Testimonials: React.FC = () => {
   const [direction, setDirection] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { once: true, margin: '-100px' });
+  const [hasInteracted, setHasInteracted] = useState(false);
   
   // Auto-advance
   useEffect(() => {
@@ -97,9 +99,26 @@ const Testimonials: React.FC = () => {
   const currentTestimonial = testimonials[currentIndex];
 
   return (
-    <section ref={containerRef} id="testimonials" className="relative py-32 md:py-48 bg-card overflow-hidden">
+    <section 
+      ref={containerRef} 
+      id="testimonials" 
+      className="relative py-32 md:py-48 bg-card overflow-hidden"
+      onMouseDown={() => setHasInteracted(true)}
+      onTouchStart={() => setHasInteracted(true)}
+    >
+      {/* Fluid Paint Canvas - Indigo/Blue Theme */}
+      <FluidPaintCanvas 
+        className="z-0 pointer-events-auto"
+        colors={['#6366f1', '#818cf8', '#4f46e5', '#a5b4fc', '#4338ca', '#c7d2fe', '#3730a3']}
+        particleSize={55}
+        fadeSpeed={0.01}
+        trailLength={20}
+        glowIntensity={1.7}
+        maxParticles={600}
+      />
+      
       {/* Background Elements */}
-      <div className="absolute inset-0 grid-pattern opacity-20" />
+      <div className="absolute inset-0 grid-pattern opacity-20 pointer-events-none" />
       <div className="absolute inset-0 noise pointer-events-none" />
       
       {/* Accent gradient */}
@@ -115,8 +134,8 @@ const Testimonials: React.FC = () => {
         "
       </motion.div>
       
-      <div className="container mx-auto px-4 md:px-6 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
+      <div className="container mx-auto px-4 md:px-6 relative z-10 pointer-events-none">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center pointer-events-auto">
           {/* Left Column - Header */}
           <div>
             <ScrollReveal animation="fade-up">

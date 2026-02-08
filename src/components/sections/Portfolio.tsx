@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
-import { ArrowUpRight, ExternalLink, ArrowRight, ArrowLeft } from 'lucide-react';
+import { ArrowUpRight, ExternalLink, ArrowRight, ArrowLeft, MousePointer2 } from 'lucide-react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ScrollReveal from '@/components/ScrollReveal';
 import MagneticElement from '@/components/MagneticElement';
+import FluidPaintCanvas from '@/components/FluidPaintCanvas';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -413,6 +414,7 @@ const Portfolio: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('All');
   const [viewMode, setViewMode] = useState<'horizontal' | 'grid'>('horizontal');
   const containerRef = useRef<HTMLDivElement>(null);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -424,13 +426,30 @@ const Portfolio: React.FC = () => {
     : projects.filter(p => p.category === activeCategory);
 
   return (
-    <section ref={containerRef} id="work" className="relative noise overflow-hidden">
+    <section 
+      ref={containerRef} 
+      id="work" 
+      className="relative noise overflow-hidden"
+      onMouseDown={() => setHasInteracted(true)}
+      onTouchStart={() => setHasInteracted(true)}
+    >
+      {/* Fluid Paint Canvas - Rose/Pink Theme */}
+      <FluidPaintCanvas 
+        className="z-0 pointer-events-auto"
+        colors={['#f43f5e', '#fb7185', '#e11d48', '#fda4af', '#be123c', '#fecdd3', '#9f1239']}
+        particleSize={55}
+        fadeSpeed={0.01}
+        trailLength={20}
+        glowIntensity={1.7}
+        maxParticles={600}
+      />
+      
       {/* Background */}
-      <div className="absolute inset-0 grid-pattern opacity-20" />
+      <div className="absolute inset-0 grid-pattern opacity-20 pointer-events-none" />
       
       {/* Section Header - Always visible */}
-      <div className="relative z-10 container mx-auto px-4 md:px-6 py-32">
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-16">
+      <div className="relative z-10 container mx-auto px-4 md:px-6 py-32 pointer-events-none">
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-16 pointer-events-auto">
           <div>
             <ScrollReveal animation="fade-up">
               <span className="inline-flex items-center gap-3 text-xs tracking-[0.3em] uppercase text-muted-foreground mb-6">
@@ -506,15 +525,17 @@ const Portfolio: React.FC = () => {
 
       {/* Content based on view mode */}
       {viewMode === 'horizontal' ? (
-        <HorizontalGallery />
+        <div className="pointer-events-auto">
+          <HorizontalGallery />
+        </div>
       ) : (
-        <div className="container mx-auto px-4 md:px-6 pb-32">
+        <div className="container mx-auto px-4 md:px-6 pb-32 pointer-events-auto">
           <ProjectGrid projects={filteredProjects} />
         </div>
       )}
 
       {/* View All CTA */}
-      <div className="container mx-auto px-4 md:px-6 pb-32">
+      <div className="container mx-auto px-4 md:px-6 pb-32 pointer-events-auto">
         <ScrollReveal animation="fade-up" delay={0.4}>
           <div className="flex justify-center">
             <MagneticElement
