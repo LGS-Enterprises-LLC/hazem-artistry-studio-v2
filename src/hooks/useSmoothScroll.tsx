@@ -14,7 +14,7 @@ export const useSmoothScroll = () => {
   useEffect(() => {
     // Create Lenis instance with optimized settings
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 1.0,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
@@ -33,11 +33,11 @@ export const useSmoothScroll = () => {
     const tickerCallback = (time: number) => {
       lenis.raf(time * 1000);
     };
-    
+
     gsap.ticker.add(tickerCallback);
-    
+
     // Disable lag smoothing for smoother animations
-    gsap.ticker.lagSmoothing(0);
+
 
     // Handle anchor links smoothly
     const handleAnchorClick = (e: MouseEvent) => {

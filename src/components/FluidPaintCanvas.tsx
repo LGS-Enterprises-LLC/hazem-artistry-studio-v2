@@ -40,7 +40,7 @@ const hexToRgb = (hex: string) => {
 const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
   className = '',
   colors = ['#ff0000', '#ff3333', '#cc0000', '#ff6666', '#990000'],
-  maxParticles = 600,
+  maxParticles = 400,
   fadeSpeed = 0.01,
   particleSize = 55,
   trailLength = 18,
@@ -58,7 +58,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
   const [isVisible, setIsVisible] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const lastFrameTimeRef = useRef(0);
-  const rgbColorsRef = useRef<Array<{r: number, g: number, b: number}>>([]);
+  const rgbColorsRef = useRef<Array<{ r: number, g: number, b: number }>>([]);
   const ambientTimerRef = useRef<number>();
   const canvasSizeRef = useRef({ width: 0, height: 0 });
 
@@ -77,11 +77,11 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
   const getBlendedColor = useCallback(() => {
     const rgbColors = rgbColorsRef.current;
     if (rgbColors.length < 2) return rgbColors[0] || { r: 255, g: 0, b: 0 };
-    
+
     const idx1 = Math.floor(Math.random() * rgbColors.length);
     const idx2 = Math.floor(Math.random() * rgbColors.length);
     const t = Math.random();
-    
+
     return {
       r: Math.round(lerp(rgbColors[idx1].r, rgbColors[idx2].r, t)),
       g: Math.round(lerp(rgbColors[idx1].g, rgbColors[idx2].g, t)),
@@ -94,12 +94,12 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     const baseSize = forceSize || Math.min(particleSize, Math.max(15, particleSize * (speed / 25)));
     const sizeVariation = baseSize * (0.6 + Math.random() * 0.8);
     const rgb = Math.random() > 0.3 ? getBlendedColor() : getRandomColorRgb();
-    
+
     // Calculate angle from velocity for brush stroke direction
     const angle = Math.atan2(vy, vx);
     // More stretch = more brush-like; based on speed
     const stretch = Math.min(3.5, 1.2 + speed * 0.08);
-    
+
     const particle: Particle = {
       x: x + (Math.random() - 0.5) * 20,
       y: y + (Math.random() - 0.5) * 20,
@@ -115,9 +115,9 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
       stretch,
       opacity: 0.4 + Math.random() * 0.4,
     };
-    
+
     particlesRef.current.push(particle);
-    
+
     if (particlesRef.current.length > maxParticles) {
       particlesRef.current.splice(0, particlesRef.current.length - maxParticles);
     }
@@ -166,16 +166,16 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     const doAmbientSplat = () => {
       const { width, height } = canvasSizeRef.current;
       if (width === 0 || height === 0) return;
-      
+
       // Random position with some padding from edges
       const padding = 80;
       const x = padding + Math.random() * (width - padding * 2);
       const y = padding + Math.random() * (height - padding * 2);
-      
+
       // Smaller, gentler splats for ambient effect
       const count = 6 + Math.floor(Math.random() * 10);
       const spread = 20 + Math.random() * 40;
-      
+
       createBrushSplat(x, y, count, spread);
     };
 
@@ -217,7 +217,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     ctxRef.current = ctx;
 
     const resizeCanvas = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
@@ -226,13 +226,13 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     };
 
     resizeCanvas();
-    
+
     let resizeTimeout: number;
     const debouncedResize = () => {
       clearTimeout(resizeTimeout);
       resizeTimeout = window.setTimeout(resizeCanvas, 100);
     };
-    
+
     window.addEventListener('resize', debouncedResize, { passive: true });
     return () => {
       window.removeEventListener('resize', debouncedResize);
@@ -263,7 +263,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
       lastFrameTimeRef.current = currentTime;
 
       const { width, height } = canvasSizeRef.current;
-      
+
       // Soft fade for trails
       ctx.fillStyle = 'rgba(0, 0, 0, 0.02)';
       ctx.fillRect(0, 0, width, height);
@@ -275,19 +275,19 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
       }
 
       ctx.globalCompositeOperation = 'lighter';
-      
+
       let writeIndex = 0;
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
         p.life -= fadeSpeed;
-        
+
         // Soft physics
         p.x += p.vx;
         p.y += p.vy;
         p.vx *= 0.97;
         p.vy *= 0.97;
         p.vy += 0.01; // minimal gravity
-        
+
         // Gradually reduce stretch as particle slows
         p.stretch = Math.max(1.0, p.stretch * 0.995);
         // Update angle to follow velocity
@@ -295,35 +295,35 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
         if (speed > 0.5) {
           p.angle = Math.atan2(p.vy, p.vx);
         }
-        
+
         const lifeFactor = p.life / p.maxLife;
         // Smooth ease-out for size
         const sizeCurve = Math.sin(lifeFactor * Math.PI);
         const currentSize = p.size * sizeCurve;
-        
+
         if (p.life <= 0 || currentSize < 0.5) continue;
-        
+
         particles[writeIndex++] = p;
-        
+
         const alpha = lifeFactor * p.opacity;
         const { r, g, b } = p;
-        
+
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(p.angle);
-        
+
         // Outer soft glow - wide, very transparent
         const glowSize = currentSize * 2.5;
         const gradient1 = ctx.createRadialGradient(0, 0, 0, 0, 0, glowSize);
         gradient1.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha * 0.15 * glowIntensity})`);
         gradient1.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${alpha * 0.06 * glowIntensity})`);
         gradient1.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        
+
         ctx.beginPath();
         ctx.ellipse(0, 0, glowSize * p.stretch, glowSize, 0, 0, Math.PI * 2);
         ctx.fillStyle = gradient1;
         ctx.fill();
-        
+
         // Main brush body - stretched ellipse
         const bodyW = currentSize * p.stretch;
         const bodyH = currentSize * 0.7;
@@ -332,12 +332,12 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
         gradient2.addColorStop(0.4, `rgba(${r}, ${g}, ${b}, ${alpha * 0.4})`);
         gradient2.addColorStop(0.7, `rgba(${r}, ${g}, ${b}, ${alpha * 0.15})`);
         gradient2.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        
+
         ctx.beginPath();
         ctx.ellipse(0, 0, bodyW, bodyH, 0, 0, Math.PI * 2);
         ctx.fillStyle = gradient2;
         ctx.fill();
-        
+
         // Hot core - small bright center
         const coreSize = currentSize * 0.25;
         ctx.beginPath();
@@ -348,12 +348,12 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
         const coreB = Math.min(255, b + 60);
         ctx.fillStyle = `rgba(${coreR}, ${coreG}, ${coreB}, ${coreAlpha})`;
         ctx.fill();
-        
+
         ctx.restore();
       }
-      
+
       particles.length = writeIndex;
-      
+
       ctx.globalCompositeOperation = 'source-over';
       animationRef.current = requestAnimationFrame(animate);
     };
@@ -393,19 +393,19 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
       const dx = pos.x - lastPosRef.current.x;
       const dy = pos.y - lastPosRef.current.y;
       const speed = Math.sqrt(dx * dx + dy * dy);
-      
+
       velocityRef.current = {
         x: velocityRef.current.x * 0.7 + dx * 0.3,
         y: velocityRef.current.y * 0.7 + dy * 0.3,
       };
-      
+
       if (isDrawingRef.current && speed > 1) {
         const steps = Math.min(Math.ceil(speed / 4), trailLength);
         for (let i = 0; i < steps; i++) {
           const t = i / steps;
           const x = lastPosRef.current.x + dx * t;
           const y = lastPosRef.current.y + dy * t;
-          
+
           // More particles at higher speeds for denser strokes
           const particleCount = Math.ceil(speed / 12) + 2;
           for (let j = 0; j < particleCount; j++) {
@@ -421,7 +421,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
           }
         }
       }
-      
+
       lastPosRef.current = pos;
     };
 
@@ -455,15 +455,15 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
   }, [createParticle, createBrushSplat, trailLength]);
 
   return (
-    <div 
-      ref={containerRef} 
+    <div
+      ref={containerRef}
       className={`absolute inset-0 ${className}`}
       style={{ contain: 'strict' }}
     >
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full"
-        style={{ 
+        style={{
           touchAction: 'none',
           background: 'transparent',
           willChange: 'contents',

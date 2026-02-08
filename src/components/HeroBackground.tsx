@@ -3,7 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { Points, PointMaterial } from '@react-three/drei';
 import * as THREE from 'three';
 
-function ParticleField({ count = 3000 }) {
+function ParticleField({ count = 2000 }) {
   const ref = useRef<THREE.Points>(null);
   
   const positions = useMemo(() => {
@@ -70,7 +70,7 @@ const HeroBackground: React.FC = () => {
     <div className="absolute inset-0 z-0">
       <Canvas
         camera={{ position: [0, 0, 5], fov: 75 }}
-        dpr={[1, 2]}
+        dpr={[1, 1.5]}
         style={{ background: 'transparent' }}
       >
         <ambientLight intensity={0.5} />
