@@ -135,7 +135,7 @@ const Contact: React.FC = () => {
             <div className="space-y-6 mb-12">
               <RevealOnScroll delay={0.3}>
                 <motion.a
-                  href="mailto:hello@hazemmagdy.com"
+                  href="mailto:Hazem.entrepreneur@gmail.com"
                   className="flex items-center gap-4 group p-4 -mx-4 hover:bg-background/50 transition-colors"
                   whileHover={{ x: 5 }}
                 >
@@ -145,7 +145,7 @@ const Contact: React.FC = () => {
                   <div>
                     <span className="text-xs text-muted-foreground uppercase tracking-wider block mb-1">Email</span>
                     <span className="text-lg font-body group-hover:text-[#06b6d4] transition-colors">
-                      hello@hazemmagdy.com
+                      Hazem.entrepreneur@gmail.com
                     </span>
                   </div>
                 </motion.a>

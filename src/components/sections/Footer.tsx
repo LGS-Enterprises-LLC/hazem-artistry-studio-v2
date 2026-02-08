@@ -7,7 +7,7 @@ import MagneticElement from '@/components/MagneticElement';
 const Footer: React.FC = () => {
   const footerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(footerRef, { once: true, margin: '-100px' });
-  
+
   const { scrollYProgress } = useScroll({
     target: footerRef,
     offset: ['start end', 'end end'],
@@ -42,7 +42,7 @@ const Footer: React.FC = () => {
   return (
     <footer ref={footerRef} className="relative bg-background noise overflow-hidden">
       {/* Large CTA Section */}
-      <motion.div 
+      <motion.div
         className="border-y border-border py-16 md:py-24 overflow-hidden"
         style={{ y, opacity }}
       >
@@ -57,7 +57,7 @@ const Footer: React.FC = () => {
             <br />
             <span className="text-accent">MIND?</span>
           </motion.h2>
-          
+
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -90,7 +90,7 @@ const Footer: React.FC = () => {
         <div className="grid md:grid-cols-4 gap-12 md:gap-8">
           {/* Brand */}
           <div className="md:col-span-2">
-            <motion.h3 
+            <motion.h3
               className="text-3xl md:text-4xl font-display font-bold mb-4"
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -98,7 +98,7 @@ const Footer: React.FC = () => {
             >
               HAZEM MAGDY
             </motion.h3>
-            <motion.p 
+            <motion.p
               className="text-muted-foreground font-body mb-8 max-w-md text-lg"
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -106,26 +106,26 @@ const Footer: React.FC = () => {
             >
               Elite web design agency crafting digital experiences that make jaws drop and generate millions for ambitious brands.
             </motion.p>
-            
+
             {/* Contact info */}
-            <motion.div 
+            <motion.div
               className="space-y-4 mb-8"
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.5 }}
             >
-              <a href="mailto:hello@hazemmagdy.com" className="flex items-center gap-3 text-muted-foreground hover:text-accent transition-colors group">
+              <a href="mailto:Hazem.entrepreneur@gmail.com" className="flex items-center gap-3 text-muted-foreground hover:text-accent transition-colors group">
                 <Mail className="w-4 h-4" />
-                <span className="font-body">hello@hazemmagdy.com</span>
+                <span className="font-body">Hazem.entrepreneur@gmail.com</span>
               </a>
               <div className="flex items-center gap-3 text-muted-foreground">
                 <MapPin className="w-4 h-4" />
                 <span className="font-body">Available Worldwide • Remote</span>
               </div>
             </motion.div>
-            
+
             {/* Availability Badge */}
-            <motion.div 
+            <motion.div
               className="inline-flex items-center gap-3 px-5 py-3 border border-success/30 bg-success/5"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={isInView ? { opacity: 1, scale: 1 } : {}}
@@ -195,7 +195,7 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Bottom Bar */}
-        <motion.div 
+        <motion.div
           className="flex flex-col md:flex-row items-center justify-between gap-6 mt-16 md:mt-24 pt-8 border-t border-border/30"
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
