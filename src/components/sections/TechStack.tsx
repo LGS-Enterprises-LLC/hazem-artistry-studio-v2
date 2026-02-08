@@ -1,6 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import ScrollReveal from '@/components/ScrollReveal';
+import FluidPaintCanvas from '@/components/FluidPaintCanvas';
+import { MousePointer2 } from 'lucide-react';
 
 const techStack = [
   { name: 'React', category: 'Frontend', level: 95, icon: '⚛️' },
@@ -133,6 +135,7 @@ const InfiniteMarquee: React.FC<{ items: string[]; reverse?: boolean; speed?: nu
 
 const TechStack: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [hasInteracted, setHasInteracted] = useState(false);
   
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -145,9 +148,26 @@ const TechStack: React.FC = () => {
   const marqueeItems2 = ['FRAMER MOTION', 'WEBGL', 'FIGMA', 'NODE.JS', 'VERCEL', 'SUPABASE'];
 
   return (
-    <section ref={containerRef} id="tech" className="relative py-32 md:py-48 overflow-hidden">
+    <section 
+      ref={containerRef} 
+      id="tech" 
+      className="relative py-32 md:py-48 overflow-hidden"
+      onMouseDown={() => setHasInteracted(true)}
+      onTouchStart={() => setHasInteracted(true)}
+    >
+      {/* Fluid Paint Canvas - Orange/Amber Theme */}
+      <FluidPaintCanvas 
+        className="z-0 pointer-events-auto"
+        colors={['#f59e0b', '#fbbf24', '#d97706', '#fcd34d', '#b45309', '#fde68a', '#92400e']}
+        particleSize={55}
+        fadeSpeed={0.01}
+        trailLength={20}
+        glowIntensity={1.7}
+        maxParticles={600}
+      />
+      
       {/* Background */}
-      <div className="absolute inset-0 grid-pattern opacity-20" />
+      <div className="absolute inset-0 grid-pattern opacity-20 pointer-events-none" />
       <div className="absolute inset-0 noise pointer-events-none" />
       
       <motion.div 
@@ -167,7 +187,7 @@ const TechStack: React.FC = () => {
         transition={{ duration: 8, repeat: Infinity }}
       />
       
-      <div className="container mx-auto px-4 md:px-6 relative z-10">
+      <div className="container mx-auto px-4 md:px-6 relative z-10 pointer-events-none">
         {/* Section Header */}
         <div className="text-center mb-16 md:mb-24">
           <ScrollReveal animation="fade-up">
@@ -192,7 +212,7 @@ const TechStack: React.FC = () => {
         </div>
 
         {/* Tech Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-16 md:mb-24">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-16 md:mb-24 pointer-events-auto">
           {techStack.map((tech, index) => (
             <TechCard key={index} tech={tech} index={index} />
           ))}
