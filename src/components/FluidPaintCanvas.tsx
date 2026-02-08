@@ -40,7 +40,7 @@ const hexToRgb = (hex: string) => {
 const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
   className = '',
   colors = ['#ff0000', '#ff3333', '#cc0000', '#ff6666', '#990000'],
-  maxParticles = 400,
+  maxParticles = 600,
   fadeSpeed = 0.01,
   particleSize = 55,
   trailLength = 18,
@@ -217,7 +217,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     ctxRef.current = ctx;
 
     const resizeCanvas = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
