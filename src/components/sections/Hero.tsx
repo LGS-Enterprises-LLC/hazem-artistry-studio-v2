@@ -61,18 +61,23 @@ const Hero: React.FC = () => {
 
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.9]);
-  const blur = useTransform(scrollYProgress, [0, 0.5], [0, 10]);
-
   useEffect(() => {
     // Only attach listener if in view to save resources
     if (!isInView) return;
 
+    let ticking = false;
     const handleMouseMove = (e: MouseEvent) => {
-      mouseX.set(e.clientX / window.innerWidth);
-      mouseY.set(e.clientY / window.innerHeight);
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          mouseX.set(e.clientX / window.innerWidth);
+          mouseY.set(e.clientY / window.innerHeight);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [mouseX, mouseY, isInView]);
 
@@ -106,31 +111,12 @@ const Hero: React.FC = () => {
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute inset-0 grid-pattern opacity-40" />
 
-            <MorphingShape
-              className="top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2"
-              color="hsl(var(--accent))"
-              size={600}
-              intensity={30}
-            />
-            <MorphingShape
-              className="bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2"
-              color="hsl(0 0% 100% / 0.3)"
-              size={400}
-              intensity={40}
-            />
+            <div className="absolute inset-0 grid-pattern opacity-40" />
 
-            <motion.div
-              className="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-transparent via-accent/30 to-transparent"
-              initial={{ scaleY: 0 }}
-              animate={{ scaleY: 1 }}
-              transition={{ duration: 2, delay: 0.5 }}
-            />
-            <motion.div
-              className="absolute top-0 right-1/3 w-px h-full bg-gradient-to-b from-transparent via-foreground/10 to-transparent"
-              initial={{ scaleY: 0 }}
-              animate={{ scaleY: 1 }}
-              transition={{ duration: 2, delay: 0.8 }}
-            />
+            {/* Removed expensive WebGL/SVG morphing shapes below the fold */}
+
+            <div className="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-transparent via-accent/30 to-transparent" />
+            <div className="absolute top-0 right-1/3 w-px h-full bg-gradient-to-b from-transparent via-foreground/10 to-transparent" />
           </div>
         </>
       )}
@@ -169,7 +155,7 @@ const Hero: React.FC = () => {
         style={{
           opacity,
           scale,
-          filter: useTransform(blur, (v) => `blur(${v}px)`),
+          willChange: 'transform, opacity'
         }}
       >
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center min-h-[80vh]">
@@ -322,33 +308,11 @@ const Hero: React.FC = () => {
           </div>
 
           {/* Right Column - 3D Portrait */}
-          <motion.div
+          <div
             className="order-1 lg:order-2 relative h-[50vh] md:h-[70vh] lg:h-auto"
-            style={{
-              x: useTransform(smoothMouseX, [0, 1], [-20, 20]),
-              y: useTransform(smoothMouseY, [0, 1], [-20, 20]),
-            }}
           >
             <Hero3DPortrait className="w-full h-full max-w-[500px] mx-auto lg:max-w-none" />
-
-            {/* Floating Elements around portrait */}
-            {isInView && (
-              <>
-                <motion.div
-                  className="absolute -top-8 -right-8 w-24 h-24 border-2 border-accent/50"
-                  animate={{ rotate: [0, 90, 0] }}
-                  transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-                  style={{ willChange: 'transform' }}
-                />
-                <motion.div
-                  className="absolute -bottom-4 -left-4 w-16 h-16 bg-accent/20 backdrop-blur-sm"
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 4, repeat: Infinity }}
-                  style={{ willChange: 'transform' }}
-                />
-              </>
-            )}
-          </motion.div>
+          </div>
         </div>
       </motion.div>
 

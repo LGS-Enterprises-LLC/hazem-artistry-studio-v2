@@ -16,10 +16,17 @@ const CustomCursor: React.FC = () => {
     const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
     if (!hasFinePointer) return;
 
+    let ticking = false;
     const moveCursor = (e: MouseEvent) => {
-      cursorX.set(e.clientX);
-      cursorY.set(e.clientY);
-      setIsVisible(true);
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          cursorX.set(e.clientX);
+          cursorY.set(e.clientY);
+          setIsVisible(true);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
     const handleMouseEnter = () => setIsVisible(true);

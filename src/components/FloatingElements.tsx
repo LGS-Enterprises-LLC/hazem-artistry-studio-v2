@@ -28,11 +28,18 @@ const FloatingElements: React.FC = () => {
   const smoothY = useSpring(mouseY, { damping: 50, stiffness: 100 });
 
   useEffect(() => {
+    let ticking = false;
     const handleMouseMove = (e: MouseEvent) => {
-      mouseX.set(e.clientX / window.innerWidth);
-      mouseY.set(e.clientY / window.innerHeight);
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          mouseX.set(e.clientX / window.innerWidth);
+          mouseY.set(e.clientY / window.innerHeight);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [mouseX, mouseY]);
 
