@@ -18,61 +18,67 @@ interface Project {
   color: string;
   stats: { label: string; value: string };
 }
+import dreamSchoolImg from '@/assets/portfolio/dream-school.jpg';
+import reagenPageImg from '@/assets/portfolio/reagen-page.jpg';
+import truewayClinicImg from '@/assets/portfolio/trueway-clinic.jpg';
+import truewayTestimonialImg from '@/assets/portfolio/trueway-testimonial.jpg';
+import dreamSchoolExteriorImg from '@/assets/portfolio/dream-school-exterior.png';
+import pharmacyImg from '@/assets/portfolio/pharmacy.jpg';
 
 const projects: Project[] = [
   {
     id: 1,
-    title: 'E-Commerce Revolution',
-    category: 'E-commerce',
-    tags: ['Web Design', 'Development', '3D'],
-    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=90',
-    color: '#ff0000',
+    title: 'Dream School Landing Page',
+    category: 'Websites',
+    tags: ['Web Design', 'Development', 'Education'],
+    image: dreamSchoolImg,
+    color: '#3b82f6',
     stats: { label: 'Revenue Increase', value: '+340%' },
   },
   {
     id: 2,
-    title: 'SaaS Dashboard Pro',
-    category: 'SaaS',
-    tags: ['UI/UX', 'Product Design'],
-    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&q=90',
-    color: '#3b82f6',
-    stats: { label: 'User Retention', value: '+85%' },
-  },
-  {
-    id: 3,
-    title: 'High-Converting Funnel',
+    title: 'Sales Operator Elite',
     category: 'Funnels',
-    tags: ['Sales Funnel', 'CRO'],
-    image: 'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=1200&q=90',
-    color: '#22c55e',
+    tags: ['Sales Funnel', 'High-Ticket', 'CRO'],
+    image: reagenPageImg,
+    color: '#000000',
     stats: { label: 'Conversion Rate', value: '12.4%' },
   },
   {
-    id: 4,
-    title: '3D Brand Experience',
+    id: 3,
+    title: 'Trueway Clinic Hub',
     category: 'Websites',
-    tags: ['3D', 'Interactive', 'WebGL'],
-    image: 'https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=1200&q=90',
+    tags: ['Healthcare', 'Appointment Booking'],
+    image: truewayClinicImg,
+    color: '#0f766e',
+    stats: { label: 'Patient Leads', value: '+250%' },
+  },
+  {
+    id: 4,
+    title: 'Find My Way - Pharmacy Directory',
+    category: 'Websites',
+    tags: ['Directory', 'Map Integration'],
+    image: pharmacyImg,
+    color: '#4ade80',
+    stats: { label: 'Daily Active Users', value: '5K+' },
+  },
+  {
+    id: 5,
+    title: 'Dream School Tour',
+    category: 'Websites',
+    tags: ['Campus Showcase', 'Virtual Tour'],
+    image: dreamSchoolExteriorImg,
     color: '#f59e0b',
     stats: { label: 'Engagement Time', value: '+420%' },
   },
   {
-    id: 5,
-    title: 'Luxury Real Estate',
-    category: 'Websites',
-    tags: ['Web Design', 'Animation'],
-    image: 'https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=1200&q=90',
-    color: '#8b5cf6',
-    stats: { label: 'Lead Generation', value: '+250%' },
-  },
-  {
     id: 6,
-    title: 'Crypto Trading Platform',
-    category: 'SaaS',
-    tags: ['Dashboard', 'Web3'],
-    image: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200&q=90',
-    color: '#ec4899',
-    stats: { label: 'Daily Active Users', value: '50K+' },
+    title: 'Trueway Testimonial Engine',
+    category: 'Funnels',
+    tags: ['Social Proof', 'Lead Gen'],
+    image: truewayTestimonialImg,
+    color: '#0d9488',
+    stats: { label: 'Review Acquisition', value: '+85%' },
   },
 ];
 
@@ -499,8 +505,8 @@ const Portfolio: React.FC = () => {
                     key={category}
                     onClick={() => setActiveCategory(category)}
                     className={`relative px-5 py-2 text-sm font-body transition-all overflow-hidden ${activeCategory === category
-                        ? 'text-accent-foreground'
-                        : 'text-muted-foreground hover:text-foreground'
+                      ? 'text-accent-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
                       }`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
