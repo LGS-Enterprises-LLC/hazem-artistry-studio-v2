@@ -115,10 +115,12 @@ const InfiniteMarquee: React.FC<{ items: string[]; reverse?: boolean; speed?: nu
 }) => {
   return (
     <div className="overflow-hidden py-6">
-      <motion.div
+      <div
         className="flex whitespace-nowrap"
-        animate={{ x: reverse ? ['-50%', '0%'] : ['0%', '-50%'] }}
-        transition={{ duration: speed, repeat: Infinity, ease: 'linear' }}
+        style={{ 
+          animation: `marquee ${speed}s linear infinite${reverse ? ' reverse' : ''}`,
+          willChange: 'transform',
+        }}
       >
         {[...items, ...items].map((item, i) => (
           <span
@@ -128,7 +130,7 @@ const InfiniteMarquee: React.FC<{ items: string[]; reverse?: boolean; speed?: nu
             {item}
           </span>
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 };
@@ -158,34 +160,20 @@ const TechStack: React.FC = () => {
       {/* Fluid Paint Canvas - Orange/Amber Theme */}
       <FluidPaintCanvas 
         className="z-0 pointer-events-auto"
-        colors={['#f59e0b', '#fbbf24', '#d97706', '#fcd34d', '#b45309']}
-        particleSize={45}
-        fadeSpeed={0.015}
-        trailLength={16}
-        glowIntensity={1.4}
-        maxParticles={250}
+        colors={['#f59e0b', '#fbbf24', '#d97706', '#fcd34d']}
+        particleSize={40}
+        fadeSpeed={0.02}
+        trailLength={12}
+        glowIntensity={1.2}
+        maxParticles={120}
       />
       
       {/* Background */}
       <div className="absolute inset-0 grid-pattern opacity-20 pointer-events-none" />
       <div className="absolute inset-0 noise pointer-events-none" />
       
-      <motion.div 
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-accent/5 rounded-full blur-[200px]"
-        style={{ y }}
-      />
-      
-      {/* Floating elements */}
-      <motion.div
-        className="absolute top-1/4 left-[5%] w-40 h-40 border-2 border-accent/10"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
-      />
-      <motion.div
-        className="absolute bottom-1/4 right-[10%] w-24 h-24 bg-accent/10"
-        animate={{ scale: [1, 1.3, 1], rotate: [0, 45, 0] }}
-        transition={{ duration: 8, repeat: Infinity }}
-      />
+      {/* Simplified background */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-accent/5 rounded-full blur-[200px]" />
       
       <div className="container mx-auto px-4 md:px-6 relative z-10 pointer-events-none">
         {/* Section Header */}

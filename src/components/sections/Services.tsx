@@ -178,27 +178,16 @@ const Services: React.FC = () => {
         <>
           <FluidPaintCanvas
             className="z-0 pointer-events-auto"
-            colors={['#8b5cf6', '#a78bfa', '#7c3aed', '#c4b5fd', '#6d28d9']}
-            particleSize={45}
-            fadeSpeed={0.015}
-            trailLength={16}
-            glowIntensity={1.4}
-            maxParticles={250}
+            colors={['#8b5cf6', '#a78bfa', '#7c3aed', '#c4b5fd']}
+            particleSize={40}
+            fadeSpeed={0.02}
+            trailLength={12}
+            glowIntensity={1.2}
+            maxParticles={120}
           />
 
           <div className="absolute inset-0 grid-pattern opacity-20 pointer-events-none" />
           <div className="absolute inset-0 noise pointer-events-none" />
-
-          {/* Floating elements */}
-          <motion.div
-            className="absolute top-1/4 right-[10%] w-80 h-80 border border-[#8b5cf6]/10 rounded-full pointer-events-none"
-            style={{ y }}
-            animate={{ rotate: 360 }}
-            transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
-          />
-          <motion.div
-            className="absolute bottom-1/4 left-[5%] w-60 h-60 bg-[#8b5cf6]/5 rounded-full blur-[100px] pointer-events-none"
-          />
         </>
       )}
 

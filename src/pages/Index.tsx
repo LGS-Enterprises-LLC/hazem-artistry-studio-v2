@@ -6,9 +6,7 @@ import ScrollProgress from '@/components/ScrollProgress';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/sections/Hero';
 
-// Wrap the background components in lazy loading as well, slightly deferred
-const DynamicGradient = lazy(() => import('@/components/DynamicGradient'));
-const FloatingElements = lazy(() => import('@/components/FloatingElements'));
+// Removed DynamicGradient and FloatingElements - too heavy for minimal visual impact
 
 // Lazy load all below-the-fold sections
 const About = lazy(() => import('@/components/sections/About'));
@@ -48,12 +46,6 @@ const Index = () => {
           <Hero />
           
           <Suspense fallback={<div className="min-h-screen" />}>
-            {/* Background elements load after Hero */}
-            <DynamicGradient 
-              colors={['hsl(0, 100%, 50%)', 'hsl(280, 100%, 40%)', 'hsl(0, 100%, 50%)']} 
-              opacity={0.08}
-            />
-            <FloatingElements />
 
             {/* Content Sections */}
             <About />

@@ -52,32 +52,21 @@ const About: React.FC = () => {
       {/* Fluid Paint Canvas - Emerald/Green Theme */}
       <FluidPaintCanvas 
         className="z-0 pointer-events-auto"
-        colors={['#10b981', '#34d399', '#059669', '#6ee7b7', '#047857']}
-        particleSize={45}
-        fadeSpeed={0.015}
-        trailLength={16}
-        glowIntensity={1.4}
-        maxParticles={250}
+        colors={['#10b981', '#34d399', '#059669', '#6ee7b7']}
+        particleSize={40}
+        fadeSpeed={0.02}
+        trailLength={12}
+        glowIntensity={1.2}
+        maxParticles={120}
       />
       
       {/* Background Elements */}
       <div className="absolute inset-0 grid-pattern opacity-20 pointer-events-none" />
       <div className="absolute inset-0 noise pointer-events-none" />
       
-      {/* Floating accent shapes */}
-      <motion.div
+      {/* Simplified accent */}
+      <div
         className="absolute top-1/4 right-[10%] w-96 h-96 bg-accent/10 rounded-full blur-[150px]"
-        style={{ y: textY }}
-      />
-      <motion.div
-        className="absolute -top-20 -left-20 w-40 h-40 border-2 border-accent/20"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
-      />
-      <motion.div
-        className="absolute bottom-40 right-[20%] w-20 h-20 bg-accent/30"
-        animate={{ scale: [1, 1.2, 1], rotate: [0, 45, 0] }}
-        transition={{ duration: 8, repeat: Infinity }}
       />
       
       <div className="container mx-auto px-4 md:px-6 relative z-10 pointer-events-none">
@@ -135,13 +124,7 @@ const About: React.FC = () => {
                   transition={{ duration: 1.8, ease: [0.25, 0.1, 0.25, 1], delay: 0.3 }}
                 />
                 
-                {/* Overlay effects */}
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-                <motion.div 
-                  className="absolute inset-0 bg-accent/20 mix-blend-multiply"
-                  animate={{ opacity: [0.1, 0.2, 0.1] }}
-                  transition={{ duration: 4, repeat: Infinity }}
-                />
               </div>
               
               {/* Decorative corner accents */}
