@@ -99,12 +99,12 @@ const Hero: React.FC = () => {
             onTouchStart={() => setHasInteracted(true)}
           >
             <FluidPaintCanvas
-              colors={['#FFD700', '#FFA500', '#FF8C00', '#FFAA33', '#FFB347', '#E6BE8A']}
-              maxParticles={250}
-              fadeSpeed={0.015}
-              particleSize={45}
-              trailLength={16}
-              glowIntensity={1.5}
+              colors={['#FFD700', '#FFA500', '#FF8C00', '#FFAA33', '#FFB347']}
+              maxParticles={120}
+              fadeSpeed={0.02}
+              particleSize={40}
+              trailLength={12}
+              glowIntensity={1.3}
             />
           </div>
 
@@ -319,18 +319,16 @@ const Hero: React.FC = () => {
       {/* Bottom Marquee */}
       {isInView && (
         <div className="absolute bottom-0 left-0 right-0 border-t border-border/50 py-4 md:py-6 bg-background/80 backdrop-blur-sm z-20 overflow-hidden">
-          <motion.div
-            className="flex whitespace-nowrap"
-            animate={{ x: [0, -2000] }}
-            transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
-            style={{ willChange: 'transform' }}
+          <div
+            className="flex whitespace-nowrap animate-marquee"
+            style={{ animation: 'marquee 30s linear infinite' }}
           >
             {[...Array(4)].map((_, i) => (
               <span key={i} className="text-xl md:text-3xl lg:text-4xl font-display font-bold text-foreground/10 mx-8">
                 WEB DESIGN • SALES FUNNELS • 3D EXPERIENCES • BRANDING • UI/UX • CONVERSION OPTIMIZATION •
               </span>
             ))}
-          </motion.div>
+          </div>
         </div>
       )}
 

@@ -38,13 +38,13 @@ const hexToRgb = (hex: string) => {
 const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
   className = '',
   colors = ['#ff0000', '#ff3333', '#cc0000', '#ff6666', '#990000'],
-  maxParticles = 250,
-  fadeSpeed = 0.015,
-  particleSize = 45,
-  trailLength = 14,
-  glowIntensity = 1.4,
+  maxParticles = 120,
+  fadeSpeed = 0.02,
+  particleSize = 40,
+  trailLength = 10,
+  glowIntensity = 1.2,
   ambientSplats = true,
-  ambientInterval = 5000,
+  ambientInterval = 8000,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
@@ -314,7 +314,8 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
 
     const animate = (currentTime: number) => {
       const deltaTime = currentTime - lastFrameTimeRef.current;
-      if (deltaTime < 16) {
+      // Cap at 30fps instead of 60fps for huge perf gain
+      if (deltaTime < 33) {
         animationRef.current = requestAnimationFrame(animate);
         return;
       }

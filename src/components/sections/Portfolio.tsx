@@ -445,12 +445,12 @@ const Portfolio: React.FC = () => {
         <>
           <FluidPaintCanvas
             className="z-0 pointer-events-auto"
-            colors={['#f43f5e', '#fb7185', '#e11d48', '#fda4af', '#be123c']}
-            particleSize={45}
-            fadeSpeed={0.015}
-            trailLength={16}
-            glowIntensity={1.4}
-            maxParticles={250}
+            colors={['#f43f5e', '#fb7185', '#e11d48', '#fda4af']}
+            particleSize={40}
+            fadeSpeed={0.02}
+            trailLength={12}
+            glowIntensity={1.2}
+            maxParticles={120}
           />
 
           <div className="absolute inset-0 grid-pattern opacity-20 pointer-events-none" />

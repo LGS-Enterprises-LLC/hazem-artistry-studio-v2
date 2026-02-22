@@ -68,25 +68,16 @@ const Contact: React.FC = () => {
         <>
           <FluidPaintCanvas
             className="z-0 pointer-events-auto"
-            colors={['#06b6d4', '#22d3ee', '#0891b2', '#67e8f9', '#0e7490']}
-            particleSize={45}
-            fadeSpeed={0.015}
-            trailLength={16}
-            glowIntensity={1.4}
-            maxParticles={250}
+            colors={['#06b6d4', '#22d3ee', '#0891b2', '#67e8f9']}
+            particleSize={40}
+            fadeSpeed={0.02}
+            trailLength={12}
+            glowIntensity={1.2}
+            maxParticles={120}
           />
 
           <div className="absolute inset-0 grid-pattern opacity-20 pointer-events-none" />
-          <motion.div
-            className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#06b6d4]/5 to-transparent pointer-events-none"
-            style={{ y }}
-          />
-
-          <motion.div
-            className="absolute -bottom-[400px] -right-[400px] w-[800px] h-[800px] border border-[#06b6d4]/10 rounded-full pointer-events-none"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 120, repeat: Infinity, ease: 'linear' }}
-          />
+          <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#06b6d4]/5 to-transparent pointer-events-none" />
         </>
       )}
 

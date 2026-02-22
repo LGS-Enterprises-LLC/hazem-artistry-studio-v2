@@ -109,12 +109,12 @@ const Testimonials: React.FC = () => {
       {/* Fluid Paint Canvas - Indigo/Blue Theme */}
       <FluidPaintCanvas 
         className="z-0 pointer-events-auto"
-        colors={['#6366f1', '#818cf8', '#4f46e5', '#a5b4fc', '#4338ca']}
-        particleSize={45}
-        fadeSpeed={0.015}
-        trailLength={16}
-        glowIntensity={1.4}
-        maxParticles={250}
+        colors={['#6366f1', '#818cf8', '#4f46e5', '#a5b4fc']}
+        particleSize={40}
+        fadeSpeed={0.02}
+        trailLength={12}
+        glowIntensity={1.2}
+        maxParticles={120}
       />
       
       {/* Background Elements */}
@@ -281,18 +281,12 @@ const Testimonials: React.FC = () => {
                     transition={{ delay: 0.5 }}
                   >
                     <div className="relative">
-                      <motion.img
+                      <img
                         src={currentTestimonial.avatar}
                         alt={currentTestimonial.author}
-                        className="w-16 h-16 rounded-full object-cover"
-                        initial={{ filter: 'grayscale(100%)' }}
-                        whileHover={{ filter: 'grayscale(0%)' }}
+                        className="w-16 h-16 rounded-full object-cover grayscale hover:grayscale-0 transition-all"
                       />
-                      <motion.div 
-                        className="absolute inset-0 rounded-full border-2 border-accent"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
-                      />
+                      <div className="absolute inset-0 rounded-full border-2 border-accent" />
                     </div>
                     <div className="flex-1">
                       <p className="font-display font-bold text-lg">
