@@ -178,12 +178,12 @@ const Services: React.FC = () => {
         <>
           <FluidPaintCanvas
             className="z-0 pointer-events-auto"
-            colors={['#8b5cf6', '#a78bfa', '#7c3aed', '#c4b5fd', '#6d28d9', '#ddd6fe', '#5b21b6']}
-            particleSize={50}
-            fadeSpeed={0.012}
-            trailLength={18}
-            glowIntensity={1.6}
-            maxParticles={600}
+            colors={['#8b5cf6', '#a78bfa', '#7c3aed', '#c4b5fd', '#6d28d9']}
+            particleSize={45}
+            fadeSpeed={0.015}
+            trailLength={16}
+            glowIntensity={1.4}
+            maxParticles={250}
           />
 
           <div className="absolute inset-0 grid-pattern opacity-20 pointer-events-none" />

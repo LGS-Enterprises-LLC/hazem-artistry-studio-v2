@@ -52,12 +52,12 @@ const About: React.FC = () => {
       {/* Fluid Paint Canvas - Emerald/Green Theme */}
       <FluidPaintCanvas 
         className="z-0 pointer-events-auto"
-        colors={['#10b981', '#34d399', '#059669', '#6ee7b7', '#047857', '#a7f3d0', '#065f46']}
-        particleSize={55}
-        fadeSpeed={0.01}
-        trailLength={20}
-        glowIntensity={1.7}
-        maxParticles={600}
+        colors={['#10b981', '#34d399', '#059669', '#6ee7b7', '#047857']}
+        particleSize={45}
+        fadeSpeed={0.015}
+        trailLength={16}
+        glowIntensity={1.4}
+        maxParticles={250}
       />
       
       {/* Background Elements */}

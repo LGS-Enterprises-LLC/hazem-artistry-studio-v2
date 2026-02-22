@@ -109,12 +109,12 @@ const Testimonials: React.FC = () => {
       {/* Fluid Paint Canvas - Indigo/Blue Theme */}
       <FluidPaintCanvas 
         className="z-0 pointer-events-auto"
-        colors={['#6366f1', '#818cf8', '#4f46e5', '#a5b4fc', '#4338ca', '#c7d2fe', '#3730a3']}
-        particleSize={55}
-        fadeSpeed={0.01}
-        trailLength={20}
-        glowIntensity={1.7}
-        maxParticles={600}
+        colors={['#6366f1', '#818cf8', '#4f46e5', '#a5b4fc', '#4338ca']}
+        particleSize={45}
+        fadeSpeed={0.015}
+        trailLength={16}
+        glowIntensity={1.4}
+        maxParticles={250}
       />
       
       {/* Background Elements */}
