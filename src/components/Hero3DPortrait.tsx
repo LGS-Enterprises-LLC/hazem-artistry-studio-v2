@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import hazemHero from '@/assets/hazem-hero.png';
+import hazemHero from '@/assets/hazem-hero.png'; // Reverted to PNG
 
 interface Hero3DPortraitProps {
   className?: string;
@@ -9,25 +9,25 @@ interface Hero3DPortraitProps {
 const Hero3DPortrait: React.FC<Hero3DPortraitProps> = ({ className = '' }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  
+
   // Mouse position values
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-  
+
   // Spring configs for smooth movement
   const springConfig = { damping: 25, stiffness: 150 };
-  
+
   // Transform mouse position to rotation
   const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [15, -15]), springConfig);
   const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-15, 15]), springConfig);
-  
+
   // Parallax layers
   const bgX = useSpring(useTransform(mouseX, [-0.5, 0.5], [20, -20]), springConfig);
   const bgY = useSpring(useTransform(mouseY, [-0.5, 0.5], [20, -20]), springConfig);
-  
+
   const midX = useSpring(useTransform(mouseX, [-0.5, 0.5], [10, -10]), springConfig);
   const midY = useSpring(useTransform(mouseY, [-0.5, 0.5], [10, -10]), springConfig);
-  
+
   const fgX = useSpring(useTransform(mouseX, [-0.5, 0.5], [-15, 15]), springConfig);
   const fgY = useSpring(useTransform(mouseY, [-0.5, 0.5], [-15, 15]), springConfig);
 
@@ -62,7 +62,7 @@ const Hero3DPortrait: React.FC<Hero3DPortraitProps> = ({ className = '' }) => {
       >
         {/* Decorative grid lines */}
         <div className="absolute inset-0 grid-pattern opacity-20" />
-        
+
         {/* Glow circles */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-accent/20 rounded-full blur-[80px]" />
@@ -94,7 +94,7 @@ const Hero3DPortrait: React.FC<Hero3DPortraitProps> = ({ className = '' }) => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 1.4, duration: 0.8 }}
           />
-          
+
           {/* Corner accents */}
           <motion.div
             className="absolute -top-3 -left-3 w-8 h-8 border-t-2 border-l-2 border-accent"
@@ -120,7 +120,7 @@ const Hero3DPortrait: React.FC<Hero3DPortraitProps> = ({ className = '' }) => {
             animate={{ opacity: 1, x: 0, y: 0 }}
             transition={{ delay: 1.9, duration: 0.5 }}
           />
-          
+
           {/* Main Image */}
           <div className="relative overflow-hidden bg-gradient-to-br from-secondary to-card">
             <motion.div
@@ -135,12 +135,12 @@ const Hero3DPortrait: React.FC<Hero3DPortraitProps> = ({ className = '' }) => {
                 className="w-full h-full object-cover"
                 onLoad={() => setIsLoaded(true)}
               />
-              
+
               {/* Image overlays for dramatic effect */}
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
               <div className="absolute inset-0 bg-accent/10 mix-blend-overlay" />
             </motion.div>
-            
+
             {/* Reveal mask animation */}
             <motion.div
               className="absolute inset-0 bg-background"
@@ -149,7 +149,7 @@ const Hero3DPortrait: React.FC<Hero3DPortraitProps> = ({ className = '' }) => {
               transition={{ delay: 0.6, duration: 1.2, ease: [0.77, 0, 0.175, 1] }}
             />
           </div>
-          
+
           {/* Rim light effect */}
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute inset-y-0 left-0 w-[1px] bg-gradient-to-b from-transparent via-accent/50 to-transparent" />
@@ -180,7 +180,7 @@ const Hero3DPortrait: React.FC<Hero3DPortraitProps> = ({ className = '' }) => {
           animate={{ rotate: [45, 225, 45], scale: [1, 1.2, 1] }}
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
         />
-        
+
         {/* Floating line */}
         <motion.div
           className="absolute top-1/2 -left-10 w-32 h-px bg-gradient-to-r from-transparent via-accent to-transparent"

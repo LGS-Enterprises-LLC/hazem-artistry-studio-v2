@@ -334,6 +334,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
 
       ctx.globalCompositeOperation = 'lighter';
 
+
       let writeIndex = 0;
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
@@ -496,4 +497,4 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
   );
 };
 
-export default FluidPaintCanvas;
+export default React.memo(FluidPaintCanvas);

@@ -1,20 +1,24 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, Suspense, lazy } from 'react';
 import useSmoothScroll from '@/hooks/useSmoothScroll';
 import AdvancedCursor from '@/components/AdvancedCursor';
 import Preloader from '@/components/Preloader';
 import ScrollProgress from '@/components/ScrollProgress';
-import DynamicGradient from '@/components/DynamicGradient';
-import FloatingElements from '@/components/FloatingElements';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/sections/Hero';
-import About from '@/components/sections/About';
-import Portfolio from '@/components/sections/Portfolio';
-import Services from '@/components/sections/Services';
-import TechStack from '@/components/sections/TechStack';
-import Testimonials from '@/components/sections/Testimonials';
-import Process from '@/components/sections/Process';
-import Contact from '@/components/sections/Contact';
-import Footer from '@/components/sections/Footer';
+
+// Wrap the background components in lazy loading as well, slightly deferred
+const DynamicGradient = lazy(() => import('@/components/DynamicGradient'));
+const FloatingElements = lazy(() => import('@/components/FloatingElements'));
+
+// Lazy load all below-the-fold sections
+const About = lazy(() => import('@/components/sections/About'));
+const Portfolio = lazy(() => import('@/components/sections/Portfolio'));
+const Services = lazy(() => import('@/components/sections/Services'));
+const TechStack = lazy(() => import('@/components/sections/TechStack'));
+const Testimonials = lazy(() => import('@/components/sections/Testimonials'));
+const Process = lazy(() => import('@/components/sections/Process'));
+const Contact = lazy(() => import('@/components/sections/Contact'));
+const Footer = lazy(() => import('@/components/sections/Footer'));
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -37,32 +41,38 @@ const Index = () => {
         {/* Scroll Progress Indicator */}
         <ScrollProgress />
         
-        {/* Dynamic gradient background that moves with scroll */}
-        <DynamicGradient 
-          colors={['hsl(0, 100%, 50%)', 'hsl(280, 100%, 40%)', 'hsl(0, 100%, 50%)']} 
-          opacity={0.08}
-        />
-        
-        {/* Floating geometric elements */}
-        <FloatingElements />
-        
         <Navbar />
         
+        {/* Non-lazy Hero section to ensure LCP is instantly rendered */}
         <main>
           <Hero />
-          <About />
-          <Portfolio />
-          <Services />
-          <TechStack />
-          <Testimonials />
-          <Process />
-          <Contact />
+          
+          <Suspense fallback={<div className="min-h-screen" />}>
+            {/* Background elements load after Hero */}
+            <DynamicGradient 
+              colors={['hsl(0, 100%, 50%)', 'hsl(280, 100%, 40%)', 'hsl(0, 100%, 50%)']} 
+              opacity={0.08}
+            />
+            <FloatingElements />
+
+            {/* Content Sections */}
+            <About />
+            <Portfolio />
+            <Services />
+            <TechStack />
+            <Testimonials />
+            <Process />
+            <Contact />
+          </Suspense>
         </main>
         
-        <Footer />
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
       </div>
     </>
   );
 };
 
 export default Index;
+

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 
 interface FloatingElement {
   id: number;
@@ -11,7 +11,7 @@ interface FloatingElement {
 }
 
 const FloatingElements: React.FC = () => {
-  const [elements] = useState<FloatingElement[]>(() => 
+  const [elements] = useState<FloatingElement[]>(() =>
     Array.from({ length: 12 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
@@ -44,11 +44,11 @@ const FloatingElements: React.FC = () => {
         return <div className="w-full h-full border border-foreground/10 rotate-45" />;
       case 'triangle':
         return (
-          <div 
+          <div
             className="w-0 h-0"
             style={{
-              borderLeft: `${size/2}px solid transparent`,
-              borderRight: `${size/2}px solid transparent`,
+              borderLeft: `${size / 2}px solid transparent`,
+              borderRight: `${size / 2}px solid transparent`,
               borderBottom: `${size}px solid hsl(var(--foreground) / 0.1)`,
             }}
           />
@@ -57,7 +57,7 @@ const FloatingElements: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden" style={{ transform: 'translateZ(0)' }}>
       {elements.map((el) => (
         <motion.div
           key={el.id}
@@ -67,6 +67,7 @@ const FloatingElements: React.FC = () => {
             top: `${el.y}%`,
             width: el.size,
             height: el.size,
+            willChange: 'transform',
           }}
           animate={{
             x: [0, 30, 0, -30, 0],
@@ -82,8 +83,9 @@ const FloatingElements: React.FC = () => {
         >
           <motion.div
             style={{
-              x: smoothX.get() * 50 * (el.id % 2 === 0 ? 1 : -1),
-              y: smoothY.get() * 50 * (el.id % 2 === 0 ? -1 : 1),
+              x: useTransform(smoothX, (v) => v * 50 * (el.id % 2 === 0 ? 1 : -1)),
+              y: useTransform(smoothY, (v) => v * 50 * (el.id % 2 === 0 ? -1 : 1)),
+              willChange: 'transform',
             }}
           >
             {getShape(el.shape, el.size)}

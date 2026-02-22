@@ -135,7 +135,7 @@ const Contact: React.FC = () => {
             <div className="space-y-6 mb-12">
               <RevealOnScroll delay={0.3}>
                 <motion.a
-                  href="mailto:Hazem.entrepreneur@gmail.com"
+                  href="mailto:hello@hazemmagdy.com"
                   className="flex items-center gap-4 group p-4 -mx-4 hover:bg-background/50 transition-colors"
                   whileHover={{ x: 5 }}
                 >
@@ -254,150 +254,32 @@ const Contact: React.FC = () => {
                   </motion.p>
                 </motion.div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-8">
-                  {/* Name & Email Row */}
-                  <div className="grid md:grid-cols-2 gap-8">
-                    {formFields.map((field, i) => (
-                      <motion.div
-                        key={field.name}
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={isFormInView ? { opacity: 1, y: 0 } : {}}
-                        transition={{ delay: 0.1 + i * 0.1 }}
-                      >
-                        <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-3 font-body">
-                          {field.label} {field.required && '*'}
-                        </label>
-                        <div className="relative">
-                          <input
-                            type={field.type}
-                            name={field.name}
-                            value={formState[field.name as keyof typeof formState]}
-                            onChange={handleChange}
-                            onFocus={() => setFocusedField(field.name)}
-                            onBlur={() => setFocusedField(null)}
-                            required={field.required}
-                            className="w-full bg-transparent border-b-2 border-border py-4 text-lg focus:outline-none focus:border-[#06b6d4] transition-colors font-body"
-                            placeholder={field.placeholder}
-                          />
-                          <motion.div
-                            className="absolute bottom-0 left-0 h-0.5 bg-[#06b6d4]"
-                            initial={{ scaleX: 0 }}
-                            animate={{ scaleX: focusedField === field.name ? 1 : 0 }}
-                            transition={{ duration: 0.3 }}
-                            style={{ transformOrigin: 'left' }}
-                          />
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-
-                  {/* Project Type & Budget Row */}
-                  <div className="grid md:grid-cols-2 gap-8">
-                    <motion.div
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={isFormInView ? { opacity: 1, y: 0 } : {}}
-                      transition={{ delay: 0.3 }}
-                    >
-                      <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-3 font-body">
-                        Project Type
-                      </label>
-                      <select
-                        name="projectType"
-                        value={formState.projectType}
-                        onChange={handleChange}
-                        className="w-full bg-transparent border-b-2 border-border py-4 text-lg focus:outline-none focus:border-[#06b6d4] transition-colors font-body appearance-none cursor-pointer"
-                      >
-                        <option value="" className="bg-background">Select a project type</option>
-                        <option value="website" className="bg-background">Website Design</option>
-                        <option value="funnel" className="bg-background">Sales Funnel</option>
-                        <option value="ecommerce" className="bg-background">E-commerce</option>
-                        <option value="saas" className="bg-background">SaaS Product</option>
-                        <option value="other" className="bg-background">Other</option>
-                      </select>
-                    </motion.div>
-
-                    <motion.div
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={isFormInView ? { opacity: 1, y: 0 } : {}}
-                      transition={{ delay: 0.4 }}
-                    >
-                      <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-3 font-body">
-                        Budget Range
-                      </label>
-                      <select
-                        name="budget"
-                        value={formState.budget}
-                        onChange={handleChange}
-                        className="w-full bg-transparent border-b-2 border-border py-4 text-lg focus:outline-none focus:border-[#06b6d4] transition-colors font-body appearance-none cursor-pointer"
-                      >
-                        <option value="" className="bg-background">Select a budget range</option>
-                        <option value="5-10k" className="bg-background">$5,000 - $10,000</option>
-                        <option value="10-25k" className="bg-background">$10,000 - $25,000</option>
-                        <option value="25-50k" className="bg-background">$25,000 - $50,000</option>
-                        <option value="50k+" className="bg-background">$50,000+</option>
-                      </select>
-                    </motion.div>
-                  </div>
-
-                  {/* Message */}
+                <div className="flex flex-col items-center justify-center text-center py-12 md:py-20 h-full">
+                  {/* WhatsApp CTA */}
                   <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={isFormInView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ delay: 0.5 }}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
                   >
-                    <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-3 font-body">
-                      Project Details *
-                    </label>
-                    <textarea
-                      name="message"
-                      value={formState.message}
-                      onChange={handleChange}
-                      onFocus={() => setFocusedField('message')}
-                      onBlur={() => setFocusedField(null)}
-                      required
-                      rows={4}
-                      className="w-full bg-transparent border-b-2 border-border py-4 text-lg focus:outline-none focus:border-[#06b6d4] transition-colors font-body resize-none"
-                      placeholder="Tell me about your project, goals, and timeline..."
-                    />
-                  </motion.div>
-
-                  {/* Submit Button */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={isFormInView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ delay: 0.6 }}
-                  >
-                    <motion.button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full py-6 bg-[#06b6d4] text-white font-display font-bold text-lg tracking-wider relative overflow-hidden group"
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.99 }}
+                    <MagneticElement
+                      as="a"
+                      href="https://wa.me/201000906903?text=I'd%20like%20to%20book%20a%20demo%20to%20build%20my%20dream%20website"
+                      className="inline-flex items-center gap-4 px-10 md:px-14 py-6 md:py-8 bg-[#25D366] text-white font-display font-bold text-xl md:text-2xl tracking-wider rounded-full hover:bg-[#20bd5a] transition-colors shadow-lg shadow-[#25D366]/20"
+                      strength={0.2}
                     >
-                      <span className={`flex items-center justify-center gap-3 transition-opacity ${isSubmitting ? 'opacity-0' : ''}`}>
-                        SEND MESSAGE
-                        <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                      </span>
-                      {isSubmitting && (
-                        <motion.div
-                          className="absolute inset-0 flex items-center justify-center"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                        >
-                          <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        </motion.div>
-                      )}
-
-                      {/* Hover effect */}
-                      <motion.div
-                        className="absolute inset-0 bg-[#0891b2]"
-                        initial={{ y: '100%' }}
-                        whileHover={{ y: 0 }}
-                        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                      />
-                    </motion.button>
+                      <span>Build Your Dream Website</span>
+                      <Send className="w-6 h-6" />
+                    </MagneticElement>
                   </motion.div>
-                </form>
+                  <motion.p
+                    className="mt-8 text-muted-foreground font-body text-lg"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.4 }}
+                  >
+                    Clicking the button will open a pre-filled WhatsApp message.
+                  </motion.p>
+                </div>
               )}
             </motion.div>
           </div>

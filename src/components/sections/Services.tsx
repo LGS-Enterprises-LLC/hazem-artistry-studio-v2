@@ -11,42 +11,36 @@ const services = [
     title: 'Web Design & Development',
     description: 'Custom websites built with cutting-edge technology that look stunning and perform flawlessly.',
     features: ['Custom Design', 'Responsive', 'Fast Loading', 'SEO Optimized'],
-    price: 'From $5,000',
   },
   {
     icon: Rocket,
     title: 'Sales Funnel Creation',
     description: 'High-converting funnels designed to turn visitors into customers and maximize your ROI.',
     features: ['Landing Pages', 'Email Sequences', 'A/B Testing', 'Analytics'],
-    price: 'From $3,000',
   },
   {
     icon: Palette,
     title: 'UI/UX Design',
     description: 'User-centered design that creates intuitive and delightful digital experiences.',
     features: ['User Research', 'Wireframing', 'Prototyping', 'Design Systems'],
-    price: 'From $4,000',
   },
   {
     icon: Code2,
     title: 'Custom Animations & 3D',
     description: 'Advanced interactions and 3D elements that make your brand stand out from the crowd.',
     features: ['GSAP Animations', 'Three.js', 'WebGL Effects', 'Scroll Magic'],
-    price: 'From $6,000',
   },
   {
     icon: Zap,
     title: 'Performance Optimization',
     description: 'Blazing-fast websites that rank higher on Google and provide better user experiences.',
     features: ['Core Web Vitals', 'Lazy Loading', 'Code Splitting', 'CDN Setup'],
-    price: 'From $2,000',
   },
   {
     icon: BarChart,
     title: 'Conversion Rate Optimization',
     description: 'Data-driven strategies to increase conversions and generate more revenue from traffic.',
     features: ['Analytics Setup', 'Heat Mapping', 'User Testing', 'A/B Testing'],
-    price: 'From $2,500',
   },
 ];
 
@@ -133,15 +127,17 @@ const ServiceCard: React.FC<{ service: typeof services[0]; index: number }> = ({
         </div>
 
         {/* Price & CTA */}
-        <div className="flex items-center justify-between pt-6 border-t border-border/50">
-          <span className="text-lg font-display font-bold text-[#8b5cf6]">{service.price}</span>
-          <motion.div
-            className="flex items-center gap-2 text-sm text-muted-foreground group-hover:text-[#8b5cf6] transition-colors"
+        <div className="flex items-center justify-between pt-6 border-t border-border/50 mt-auto">
+          <motion.a
+            href="https://wa.me/201000906903?text=I'd%20like%20to%20book%20a%20demo%20to%20build%20my%20dream%20website"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-sm font-display text-muted-foreground group-hover:text-[#8b5cf6] transition-colors"
             animate={{ x: isHovered ? 5 : 0 }}
           >
-            <span>Learn more</span>
+            <span>Build Your Dream Website</span>
             <ArrowRight className="w-4 h-4" />
-          </motion.div>
+          </motion.a>
         </div>
 
         {/* Bottom accent line */}
