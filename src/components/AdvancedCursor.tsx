@@ -16,7 +16,7 @@ const AdvancedCursor: React.FC = () => {
     variant: 'default',
   });
   const [isVisible, setIsVisible] = useState(false);
-  const [trail, setTrail] = useState<{ x: number; y: number; id: number }[]>([]);
+  const trailRef = useRef<{ x: number; y: number; id: number }[]>([]);
   const trailIdRef = useRef(0);
 
   const cursorX = useMotionValue(-100);
@@ -39,13 +39,6 @@ const AdvancedCursor: React.FC = () => {
       cursorX.set(e.clientX);
       cursorY.set(e.clientY);
       setIsVisible(true);
-
-      // Add trail point
-      trailIdRef.current += 1;
-      setTrail(prev => {
-        const newTrail = [...prev, { x: e.clientX, y: e.clientY, id: trailIdRef.current }];
-        return newTrail.slice(-8); // Keep last 8 points
-      });
     };
 
     const handleMouseDown = () => setState(prev => ({ ...prev, isClicking: true }));
@@ -95,13 +88,7 @@ const AdvancedCursor: React.FC = () => {
     };
   }, [cursorX, cursorY]);
 
-  // Clean up old trail points
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTrail(prev => prev.slice(1));
-    }, 50);
-    return () => clearInterval(interval);
-  }, []);
+  // Trail cleanup removed - trail disabled for performance
 
   const getOutlineSize = () => {
     if (state.text) return 100;
@@ -124,27 +111,6 @@ const AdvancedCursor: React.FC = () => {
 
   return (
     <>
-      {/* Trail effect */}
-      <AnimatePresence>
-        {trail.map((point, index) => (
-          <motion.div
-            key={point.id}
-            className="fixed pointer-events-none z-[9997] rounded-full mix-blend-difference"
-            initial={{ opacity: 0.6, scale: 1 }}
-            animate={{ opacity: 0, scale: 0.3 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            style={{
-              left: point.x,
-              top: point.y,
-              width: 4,
-              height: 4,
-              backgroundColor: 'white',
-              transform: 'translate(-50%, -50%)',
-            }}
-          />
-        ))}
-      </AnimatePresence>
 
       {/* Main cursor dot */}
       <motion.div

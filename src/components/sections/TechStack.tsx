@@ -158,12 +158,12 @@ const TechStack: React.FC = () => {
       {/* Fluid Paint Canvas - Orange/Amber Theme */}
       <FluidPaintCanvas 
         className="z-0 pointer-events-auto"
-        colors={['#f59e0b', '#fbbf24', '#d97706', '#fcd34d', '#b45309', '#fde68a', '#92400e']}
-        particleSize={55}
-        fadeSpeed={0.01}
-        trailLength={20}
-        glowIntensity={1.7}
-        maxParticles={600}
+        colors={['#f59e0b', '#fbbf24', '#d97706', '#fcd34d', '#b45309']}
+        particleSize={45}
+        fadeSpeed={0.015}
+        trailLength={16}
+        glowIntensity={1.4}
+        maxParticles={250}
       />
       
       {/* Background */}

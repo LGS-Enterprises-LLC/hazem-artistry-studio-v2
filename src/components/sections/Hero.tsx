@@ -100,11 +100,11 @@ const Hero: React.FC = () => {
           >
             <FluidPaintCanvas
               colors={['#FFD700', '#FFA500', '#FF8C00', '#FFAA33', '#FFB347', '#E6BE8A']}
-              maxParticles={600}
-              fadeSpeed={0.012}
-              particleSize={55}
-              trailLength={20}
-              glowIntensity={1.8}
+              maxParticles={250}
+              fadeSpeed={0.015}
+              particleSize={45}
+              trailLength={16}
+              glowIntensity={1.5}
             />
           </div>
 

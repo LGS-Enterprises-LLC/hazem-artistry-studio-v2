@@ -12,7 +12,7 @@ interface FloatingElement {
 
 const FloatingElements: React.FC = () => {
   const [elements] = useState<FloatingElement[]>(() =>
-    Array.from({ length: 12 }, (_, i) => ({
+    Array.from({ length: 5 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,

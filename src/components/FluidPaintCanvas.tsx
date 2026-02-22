@@ -38,13 +38,13 @@ const hexToRgb = (hex: string) => {
 const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
   className = '',
   colors = ['#ff0000', '#ff3333', '#cc0000', '#ff6666', '#990000'],
-  maxParticles = 600,
-  fadeSpeed = 0.01,
-  particleSize = 55,
-  trailLength = 18,
-  glowIntensity = 1.6,
+  maxParticles = 250,
+  fadeSpeed = 0.015,
+  particleSize = 45,
+  trailLength = 14,
+  glowIntensity = 1.4,
   ambientSplats = true,
-  ambientInterval = 3000,
+  ambientInterval = 5000,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
@@ -75,7 +75,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
   useEffect(() => {
     const sprites: HTMLCanvasElement[] = [];
     const baseRgbs = colors.map(hexToRgb);
-    const mixCount = 40; // Generate 40 random blends for variety
+    const mixCount = 15; // Reduced from 40 for lighter sprite generation
 
     const allRgbs = [...baseRgbs];
 
@@ -183,7 +183,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
     }
   }, [maxParticles, particleSize]);
 
-  const createBrushSplat = useCallback((x: number, y: number, count: number = 18, spread: number = 40) => {
+  const createBrushSplat = useCallback((x: number, y: number, count: number = 10, spread: number = 30) => {
     for (let i = 0; i < count; i++) {
       const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.8;
       const dist = Math.random() * spread;
@@ -198,7 +198,7 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
       );
     }
     // Add some smaller satellite droplets
-    for (let i = 0; i < count * 0.6; i++) {
+    for (let i = 0; i < count * 0.3; i++) {
       const angle = Math.random() * Math.PI * 2;
       const dist = spread * 0.5 + Math.random() * spread;
       const speed = 1 + Math.random() * 3;
@@ -231,8 +231,8 @@ const FluidPaintCanvas: React.FC<FluidPaintCanvasProps> = ({
       const x = padding + Math.random() * (width - padding * 2);
       const y = padding + Math.random() * (height - padding * 2);
 
-      const count = 6 + Math.floor(Math.random() * 10);
-      const spread = 20 + Math.random() * 40;
+      const count = 4 + Math.floor(Math.random() * 6);
+      const spread = 15 + Math.random() * 30;
 
       createBrushSplat(x, y, count, spread);
     };
