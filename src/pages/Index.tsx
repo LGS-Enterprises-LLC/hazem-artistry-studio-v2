@@ -1,5 +1,8 @@
 import { useState, useCallback, Suspense, lazy } from 'react';
 import useSmoothScroll from '@/hooks/useSmoothScroll';
+
+const isTouchDevice = typeof window !== 'undefined' &&
+  ('ontouchstart' in window || navigator.maxTouchPoints > 0 || window.matchMedia('(pointer: coarse)').matches);
 import AdvancedCursor from '@/components/AdvancedCursor';
 import Preloader from '@/components/Preloader';
 import ScrollProgress from '@/components/ScrollProgress';
@@ -29,12 +32,12 @@ const Index = () => {
 
   return (
     <>
-      {/* Cinematic Preloader */}
-      {isLoading && <Preloader onComplete={handlePreloaderComplete} duration={2.5} />}
+      {/* Cinematic Preloader — fast on mobile */}
+      {isLoading && <Preloader onComplete={handlePreloaderComplete} duration={isTouchDevice ? 0.8 : 2.5} />}
       
       <div className="relative min-h-screen bg-background text-foreground overflow-x-hidden">
-        {/* Advanced Cursor with trail effects */}
-        <AdvancedCursor />
+        {/* Advanced Cursor — desktop only (AdvancedCursor self-guards but skip render entirely on mobile) */}
+        {!isTouchDevice && <AdvancedCursor />}
         
         {/* Scroll Progress Indicator */}
         <ScrollProgress />

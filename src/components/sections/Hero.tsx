@@ -7,6 +7,9 @@ import MorphingShape from '@/components/MorphingShape';
 import Counter from '@/components/Counter';
 import FluidPaintCanvas from '@/components/FluidPaintCanvas';
 
+const isTouchDevice = typeof window !== 'undefined' &&
+  ('ontouchstart' in window || navigator.maxTouchPoints > 0 || window.matchMedia('(pointer: coarse)').matches);
+
 // Optimized split headline - words instead of letters to prevent broken rendering
 const SplitWord: React.FC<{
   text: string;
@@ -98,14 +101,19 @@ const Hero: React.FC = () => {
             onMouseDown={() => setHasInteracted(true)}
             onTouchStart={() => setHasInteracted(true)}
           >
-            <FluidPaintCanvas
-              colors={['#FFD700', '#FFA500', '#FF8C00', '#FFAA33', '#FFB347']}
-              maxParticles={120}
-              fadeSpeed={0.02}
-              particleSize={40}
-              trailLength={12}
-              glowIntensity={1.3}
-            />
+            {isTouchDevice ? (
+              // Mobile: lightweight CSS gradient instead of canvas animation
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 via-transparent to-orange-400/5" />
+            ) : (
+              <FluidPaintCanvas
+                colors={['#FFD700', '#FFA500', '#FF8C00', '#FFAA33', '#FFB347']}
+                maxParticles={120}
+                fadeSpeed={0.02}
+                particleSize={40}
+                trailLength={12}
+                glowIntensity={1.3}
+              />
+            )}
           </div>
 
           <div className="absolute inset-0 pointer-events-none">

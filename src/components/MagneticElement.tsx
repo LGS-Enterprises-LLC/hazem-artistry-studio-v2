@@ -10,6 +10,10 @@ interface MagneticElementProps {
   href?: string;
 }
 
+// Detect touch/mobile once at module level (avoids hook overhead)
+const isTouchDevice = typeof window !== 'undefined' && 
+  ('ontouchstart' in window || navigator.maxTouchPoints > 0 || window.matchMedia('(pointer: coarse)').matches);
+
 const MagneticElement: React.FC<MagneticElementProps> = ({
   children,
   className = '',
@@ -19,42 +23,41 @@ const MagneticElement: React.FC<MagneticElementProps> = ({
   href,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
-  
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-
   const springConfig = { damping: 15, stiffness: 200, mass: 0.5 };
   const springX = useSpring(x, springConfig);
   const springY = useSpring(y, springConfig);
 
+  // On touch devices: render as plain element, zero JS overhead
+  if (isTouchDevice) {
+    const Tag = as as keyof JSX.IntrinsicElements;
+    return <Tag className={className} onClick={onClick} {...(as === 'a' && href ? { href } : {})}>{children}</Tag>;
+  }
+
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!ref.current) return;
     const rect = ref.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-
-    x.set((e.clientX - centerX) * strength);
-    y.set((e.clientY - centerY) * strength);
+    x.set((e.clientX - rect.left - rect.width / 2) * strength);
+    y.set((e.clientY - rect.top - rect.height / 2) * strength);
   };
 
-  const handleMouseLeave = () => {
-    x.set(0);
-    y.set(0);
-  };
+  const handleMouseLeave = () => { x.set(0); y.set(0); };
 
   const Component = motion[as] as typeof motion.div;
-
-  const props = {
-    ref,
-    className,
-    style: { x: springX, y: springY },
-    onMouseMove: handleMouseMove,
-    onMouseLeave: handleMouseLeave,
-    onClick,
-    ...(as === 'a' && href ? { href } : {}),
-  };
-
-  return <Component {...props}>{children}</Component>;
+  return (
+    <Component
+      ref={ref}
+      className={className}
+      style={{ x: springX, y: springY }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      onClick={onClick}
+      {...(as === 'a' && href ? { href } : {})}
+    >
+      {children}
+    </Component>
+  );
 };
 
 export default MagneticElement;

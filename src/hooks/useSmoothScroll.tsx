@@ -12,6 +12,10 @@ export const useSmoothScroll = () => {
   const lenisRef = useRef<Lenis | null>(null);
 
   useEffect(() => {
+    // Disable Lenis on touch/mobile — native momentum scroll is faster
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || window.matchMedia('(pointer: coarse)').matches;
+    if (isTouchDevice) return;
+
     // Create Lenis instance with optimized settings
     const lenis = new Lenis({
       duration: 0.8,
